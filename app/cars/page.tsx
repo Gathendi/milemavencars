@@ -1,80 +1,82 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import CarCard from "@/components/CarCard"
-import { Search, Filter } from "lucide-react"
+import { useState, useEffect } from "react";
+import CarCard from "@/components/CarCard";
+import { Search, Filter } from "lucide-react";
 
 interface Car {
-  id: string
-  name: string
-  category: string
-  price: number
-  image: string
-  seats: number
-  transmission: string
-  fuel: string
-  available: boolean
+  id: string;
+  name: string;
+  category: string;
+  price: number;
+  image: string;
+  seats: number;
+  transmission: string;
+  fuel: string;
+  available: boolean;
 }
 
 export default function CarsPage() {
-  const [cars, setCars] = useState<Car[]>([])
-  const [filteredCars, setFilteredCars] = useState<Car[]>([])
-  const [searchTerm, setSearchTerm] = useState("")
-  const [selectedCategory, setSelectedCategory] = useState("all")
-  const [priceRange, setPriceRange] = useState("all")
-  const [loading, setLoading] = useState(true)
+  const [cars, setCars] = useState<Car[]>([]);
+  const [filteredCars, setFilteredCars] = useState<Car[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [priceRange, setPriceRange] = useState("all");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchCars()
-  }, [])
+    fetchCars();
+  }, []);
 
   useEffect(() => {
-    filterCars()
-  }, [cars, searchTerm, selectedCategory, priceRange])
+    filterCars();
+  }, [cars, searchTerm, selectedCategory, priceRange]);
 
   const fetchCars = async () => {
     try {
-      const response = await fetch("/api/cars")
-      const data = await response.json()
-      setCars(data)
+      const response = await fetch("/api/cars");
+      const data = await response.json();
+      setCars(data);
     } catch (error) {
-      console.error("Error fetching cars:", error)
+      console.error("Error fetching cars:", error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const filterCars = () => {
-    let filtered = cars
+    let filtered = cars;
 
     // Search filter
     if (searchTerm) {
       filtered = filtered.filter(
         (car) =>
           car.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          car.category.toLowerCase().includes(searchTerm.toLowerCase()),
-      )
+          car.category.toLowerCase().includes(searchTerm.toLowerCase())
+      );
     }
 
     // Category filter
     if (selectedCategory !== "all") {
-      filtered = filtered.filter((car) => car.category.toLowerCase() === selectedCategory.toLowerCase())
+      filtered = filtered.filter(
+        (car) => car.category.toLowerCase() === selectedCategory.toLowerCase()
+      );
     }
 
     // Price filter
     if (priceRange !== "all") {
-      const [min, max] = priceRange.split("-").map(Number)
+      const [min, max] = priceRange.split("-").map(Number);
       filtered = filtered.filter((car) => {
         if (max) {
-          return car.price >= min && car.price <= max
+          return car.price >= min && car.price <= max;
         } else {
-          return car.price >= min
+          return car.price >= min;
         }
-      })
+      });
     }
 
-    setFilteredCars(filtered)
-  }
+    setFilteredCars(filtered);
+  };
 
   if (loading) {
     return (
@@ -83,7 +85,7 @@ export default function CarsPage() {
           <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-red-600"></div>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -94,7 +96,8 @@ export default function CarsPage() {
           Our <span className="text-red-600">Vehicle Fleet</span>
         </h1>
         <p className="text-gray-600 max-w-2xl mx-auto">
-          Choose from our extensive collection of premium vehicles, perfect for any journey across Kenya.
+          Choose from our extensive collection of premium vehicles, perfect for
+          any journey across Kenya.
         </p>
       </div>
 
@@ -124,6 +127,8 @@ export default function CarsPage() {
             <option value="suv">SUV</option>
             <option value="hatchback">Hatchback</option>
             <option value="luxury">Luxury</option>
+            <option value="mpv">MPV</option>
+            <option value="van">Van</option>
           </select>
 
           {/* Price Filter */}
@@ -142,9 +147,9 @@ export default function CarsPage() {
           {/* Clear Filters */}
           <button
             onClick={() => {
-              setSearchTerm("")
-              setSelectedCategory("all")
-              setPriceRange("all")
+              setSearchTerm("");
+              setSelectedCategory("all");
+              setPriceRange("all");
             }}
             className="btn-secondary"
           >
@@ -170,10 +175,12 @@ export default function CarsPage() {
       ) : (
         <div className="text-center py-12">
           <Filter className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-xl font-semibold text-gray-600 mb-2">No cars found</h3>
+          <h3 className="text-xl font-semibold text-gray-600 mb-2">
+            No cars found
+          </h3>
           <p className="text-gray-500">Try adjusting your search criteria</p>
         </div>
       )}
     </div>
-  )
+  );
 }
