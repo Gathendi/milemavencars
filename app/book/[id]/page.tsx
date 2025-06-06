@@ -7,6 +7,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { Calendar, Clock, MapPin } from "lucide-react";
 import Image from "next/image";
+import CarDetails from "@/components/CarDetails";
 
 interface Car {
   id: string;
@@ -17,6 +18,8 @@ interface Car {
   seats: number;
   transmission: string;
   fuel_type: string;
+  available: boolean;
+  description?: string;
 }
 
 export default function BookingPage() {
@@ -126,40 +129,7 @@ export default function BookingPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Car Details */}
-          <div className="card p-6">
-            <div className="relative w-full h-64">
-              <Image
-                src={
-                  car.image_url ||
-                  `https://source.unsplash.com/800x600/?car&sig=${car.id}`
-                }
-                alt={car.name}
-                fill
-                className="object-cover rounded-lg"
-                sizes="(max-width: 768px) 100vw, 50vw"
-                priority={true}
-              />
-            </div>
-            <h2 className="text-2xl font-bold mb-2 mt-4">{car.name}</h2>
-            <p className="text-gray-600 mb-4">{car.category}</p>
-
-            <div className="grid grid-cols-2 gap-4 text-sm">
-              <div>
-                <span className="font-semibold">Seats:</span> {car.seats}
-              </div>
-              <div>
-                <span className="font-semibold">Transmission:</span>{" "}
-                {car.transmission}
-              </div>
-              <div>
-                <span className="font-semibold">Fuel:</span> {car.fuel_type}
-              </div>
-              <div>
-                <span className="font-semibold">Price:</span> KSh{" "}
-                {car.price.toLocaleString()}/day
-              </div>
-            </div>
-          </div>
+          <CarDetails car={car} />
 
           {/* Booking Form */}
           <div className="card p-6">

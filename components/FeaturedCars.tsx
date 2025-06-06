@@ -7,6 +7,7 @@ import { Users, Fuel, Settings } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import api from "@/lib/api";
+import CarCard from "./CarCard";
 
 interface Car {
   id: string;
@@ -79,65 +80,7 @@ export default function FeaturedCars() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {cars.map((car) => (
-            <Card
-              key={car.id}
-              className="overflow-hidden hover:shadow-xl rounded-xl transition-shadow duration-300"
-            >
-              <div className="relative">
-                <div className="relative w-full h-48">
-                  <Image
-                    src={
-                      car.image_url ||
-                      `https://source.unsplash.com/800x600/?car&sig=${car.id}`
-                    }
-                    alt={car.name}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                    priority={false}
-                  />
-                </div>
-                <div className="absolute top-4 left-4">
-                  <span className="bg-red-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
-                    {car.category}
-                  </span>
-                </div>
-              </div>
-
-              <CardContent className="p-6">
-                <h3 className="text-xl font-bold mb-2">{car.name}</h3>
-
-                {/* Car Features */}
-                <div className="grid grid-cols-3 gap-4 mb-4 text-sm text-gray-600">
-                  <div className="flex items-center space-x-2">
-                    <Users className="w-4 h-4" />
-                    <span>{car.seats} seats</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Settings className="w-4 h-4" />
-                    <span>{car.transmission}</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Fuel className="w-4 h-4" />
-                    <span>{car.fuel_type}</span>
-                  </div>
-                </div>
-              </CardContent>
-
-              <CardFooter className="p-6 pt-0">
-                <div className="flex justify-between items-center w-full">
-                  <div>
-                    <span className="text-2xl font-bold text-red-600">
-                      KSh {car.price.toLocaleString()}
-                    </span>
-                    <span className="text-gray-500">/day</span>
-                  </div>
-                  <Link href={`/book/${car.id}`}>
-                    <Button>Book Now</Button>
-                  </Link>
-                </div>
-              </CardFooter>
-            </Card>
+            <CarCard key={car.id} car={car} />
           ))}
         </div>
 
