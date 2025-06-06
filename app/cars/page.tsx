@@ -9,10 +9,10 @@ interface Car {
   name: string;
   category: string;
   price: number;
-  image: string;
+  image_url: string;
   seats: number;
   transmission: string;
-  fuel: string;
+  fuel_type: string;
   available: boolean;
 }
 

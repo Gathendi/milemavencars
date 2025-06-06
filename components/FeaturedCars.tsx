@@ -5,6 +5,7 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Users, Fuel, Settings } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import api from "@/lib/api";
 
 interface Car {
@@ -80,17 +81,22 @@ export default function FeaturedCars() {
           {cars.map((car) => (
             <Card
               key={car.id}
-              className="overflow-hidden hover:shadow-xl transition-shadow duration-300"
+              className="overflow-hidden hover:shadow-xl rounded-xl transition-shadow duration-300"
             >
               <div className="relative">
-                <img
-                  src={
-                    car.image_url ||
-                    `https://source.unsplash.com/800x600/?car&sig=${car.id}`
-                  }
-                  alt={car.name}
-                  className="w-full h-48 object-cover"
-                />
+                <div className="relative w-full h-48">
+                  <Image
+                    src={
+                      car.image_url ||
+                      `https://source.unsplash.com/800x600/?car&sig=${car.id}`
+                    }
+                    alt={car.name}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    priority={false}
+                  />
+                </div>
                 <div className="absolute top-4 left-4">
                   <span className="bg-red-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
                     {car.category}

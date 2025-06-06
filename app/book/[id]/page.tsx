@@ -6,16 +6,17 @@ import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { Calendar, Clock, MapPin } from "lucide-react";
+import Image from "next/image";
 
 interface Car {
   id: string;
   name: string;
   category: string;
   price: number;
-  image: string;
+  image_url: string;
   seats: number;
   transmission: string;
-  fuel: string;
+  fuel_type: string;
 }
 
 export default function BookingPage() {
@@ -126,15 +127,20 @@ export default function BookingPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Car Details */}
           <div className="card p-6">
-            <img
-              src={
-                car.image ||
-                `https://source.unsplash.com/800x600/?car&sig=${car.id}`
-              }
-              alt={car.name}
-              className="w-full h-64 object-cover rounded-lg mb-4"
-            />
-            <h2 className="text-2xl font-bold mb-2">{car.name}</h2>
+            <div className="relative w-full h-64">
+              <Image
+                src={
+                  car.image_url ||
+                  `https://source.unsplash.com/800x600/?car&sig=${car.id}`
+                }
+                alt={car.name}
+                fill
+                className="object-cover rounded-lg"
+                sizes="(max-width: 768px) 100vw, 50vw"
+                priority={true}
+              />
+            </div>
+            <h2 className="text-2xl font-bold mb-2 mt-4">{car.name}</h2>
             <p className="text-gray-600 mb-4">{car.category}</p>
 
             <div className="grid grid-cols-2 gap-4 text-sm">
@@ -146,7 +152,7 @@ export default function BookingPage() {
                 {car.transmission}
               </div>
               <div>
-                <span className="font-semibold">Fuel:</span> {car.fuel}
+                <span className="font-semibold">Fuel:</span> {car.fuel_type}
               </div>
               <div>
                 <span className="font-semibold">Price:</span> KSh{" "}

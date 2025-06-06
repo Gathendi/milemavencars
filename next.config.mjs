@@ -7,8 +7,7 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   images: {
-    unoptimized: true,
-    domains: ['placeholder.svg'],
+    domains: ['images.unsplash.com', 'source.unsplash.com'],
   }
 }
 

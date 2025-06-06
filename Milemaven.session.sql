@@ -1,2 +1,3 @@
-SELECT *
-FROM users;
+UPDATE cars
+SET price = '15000'
+WHERE id = 9;
