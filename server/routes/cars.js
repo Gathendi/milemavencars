@@ -13,6 +13,7 @@ router.get(
     query("minPrice").optional().isNumeric(),
     query("maxPrice").optional().isNumeric(),
     query("available").optional().isBoolean(),
+    query("featured").optional().isBoolean(),
     query("search").optional().isString(),
   ],
   async (req, res) => {
@@ -49,6 +50,12 @@ router.get(
         paramCount++
         query += ` AND available = $${paramCount}`
         params.push(req.query.available === "true")
+      }
+
+      if (req.query.featured !== undefined) {
+        paramCount++
+        query += ` AND featured = $${paramCount}`
+        params.push(req.query.featured === "true")
       }
 
       if (req.query.search) {

@@ -29,8 +29,8 @@ export default function FeaturedCars() {
 
   const fetchFeaturedCars = async () => {
     try {
-      const response = await api.get("/cars?available=true");
-      setCars(response.data.slice(0, 3)); // Show only first 3 cars
+      const response = await api.get("/cars?featured=true");
+      setCars(response.data);
     } catch (error) {
       console.error("Error fetching cars:", error);
     } finally {

@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS cars (
     ),
     description TEXT,
     available BOOLEAN DEFAULT true,
+    featured BOOLEAN DEFAULT false,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
@@ -26,7 +27,8 @@ INSERT INTO cars (
         seats,
         transmission,
         fuel_type,
-        description
+        description,
+        featured
     )
 VALUES (
         'Toyota Camry',
@@ -36,7 +38,8 @@ VALUES (
         5,
         'automatic',
         'petrol',
-        'Comfortable sedan for family trips'
+        'Comfortable sedan for family trips',
+        true
     ),
     (
         'Honda CR-V',
@@ -46,7 +49,8 @@ VALUES (
         5,
         'automatic',
         'petrol',
-        'Spacious SUV with great fuel economy'
+        'Spacious SUV with great fuel economy',
+        true
     ),
     (
         'Volkswagen Golf',
@@ -56,5 +60,6 @@ VALUES (
         5,
         'manual',
         'petrol',
-        'Fun to drive hatchback'
+        'Fun to drive hatchback',
+        false
     );

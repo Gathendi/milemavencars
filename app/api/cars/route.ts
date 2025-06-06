@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server"
+import pool from "@/server/config/database";
 
 // Mock data - In production, this would come from your database
 const cars = [
@@ -76,12 +77,52 @@ const cars = [
   },
 ]
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    return NextResponse.json(cars)
+    const { searchParams } = new URL(request.url);
+    const featured = searchParams.get("featured");
+    const available = searchParams.get("available");
+
+    let query = "SELECT * FROM cars";
+    const conditions = [];
+    const params = [];
+    let paramCount = 0;
+
+    if (featured === "true") {
+      paramCount++;
+      conditions.push(`featured = $${paramCount}`);
+      params.push(true);
+    }
+    if (available === "true") {
+      paramCount++;
+      conditions.push(`available = $${paramCount}`);
+      params.push(true);
+    }
+
+    if (conditions.length > 0) {
+      query += " WHERE " + conditions.join(" AND ");
+    }
+
+    const result = await pool.query(query, params);
+    
+    // Transform the data to match the expected format
+    const cars = result.rows.map(car => ({
+      id: car.id.toString(),
+      name: car.name,
+      category: car.category,
+      price: parseFloat(car.price),
+      image_url: car.image_url,
+      seats: car.seats,
+      transmission: car.transmission,
+      fuel_type: car.fuel_type,
+      available: car.available,
+      description: car.description
+    }));
+
+    return NextResponse.json(cars);
   } catch (error) {
-    console.error("Error fetching cars:", error)
-    return NextResponse.json({ error: "Failed to fetch cars" }, { status: 500 })
+    console.error("Error fetching cars:", error);
+    return NextResponse.json({ error: "Failed to fetch cars" }, { status: 500 });
   }
 }
 
