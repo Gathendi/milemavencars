@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
 import {
   Card,
@@ -9,6 +9,9 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import type { DashboardData } from "@/lib/types";
+import CarCard from "@/components/CarCard";
+import Image from "next/image";
 
 const TABS = [
   {
@@ -181,20 +184,26 @@ const mockRecommendedCars = [
   {
     id: "r1",
     name: "Tesla Model 3",
-    image: "/images/tesla-model-3.jpg",
-    price: "KES 8,000/day",
+    category: "Sedan",
+    price: 20000,
+    image_url: "https://source.unsplash.com/800x600/?tesla-model-3",
+    seats: 5,
+    transmission: "Automatic",
+    fuel_type: "Electric",
+    available: true,
+    description: "High-performance electric sedan",
   },
   {
     id: "r2",
     name: "Toyota Land Cruiser",
-    image: "/images/toyota-land-cruiser.jpg",
-    price: "KES 12,000/day",
-  },
-  {
-    id: "r3",
-    name: "Mazda CX-5",
-    image: "/images/mazda-cx5.jpg",
-    price: "KES 7,000/day",
+    category: "SUV",
+    price: 25000,
+    image_url: "https://source.unsplash.com/800x600/?toyota-land-cruiser",
+    seats: 8,
+    transmission: "Automatic",
+    fuel_type: "Diesel",
+    available: true,
+    description: "Premium luxury SUV",
   },
 ];
 
@@ -209,13 +218,22 @@ function UserProfileCard({
     <div className="px-4 mb-8 text-center relative z-10">
       <div className="relative inline-block group mb-3">
         <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-white/80 shadow-lg mx-auto backdrop-blur-sm">
-          <img
+          <Image
             src={
               user?.avatar ||
-              "https://ui-avatars.com/api/?name=Boniface+Gathendi&background=ff0000"
+              `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                user?.name || "Boniface Gathendi"
+              )}&background=ff0000&color=fff`
             }
             alt="Profile"
+            fill
             className="w-full h-full object-cover"
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                user?.name || "Boniface Gathendi"
+              )}&background=ff0000&color=fff`;
+            }}
           />
         </div>
         <button className="absolute bottom-0 right-0 bg-red-500/90 text-white p-1 rounded-full shadow-lg hover:bg-red-600/90 transition-colors backdrop-blur-sm">
@@ -485,32 +503,7 @@ function RecommendedCars() {
           </CardHeader>
           <CardContent className="space-y-4 relative z-10">
             {mockRecommendedCars.map((car) => (
-              <div
-                key={car.id}
-                className="flex items-center gap-4 p-3 rounded-lg backdrop-blur-sm bg-white/40 hover:bg-white/60 transition-colors"
-              >
-                <div className="w-16 h-12 bg-gray-100 rounded-md overflow-hidden">
-                  <img
-                    src={car.image}
-                    alt={car.name}
-                    className="w-full h-full object-cover"
-                    onError={(e) =>
-                      (e.currentTarget.src = "https://via.placeholder.com/150")
-                    }
-                  />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="font-medium truncate">{car.name}</div>
-                  <div className="text-sm text-gray-500">{car.price}</div>
-                </div>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="backdrop-blur-sm bg-white/80 hover:bg-white/90"
-                >
-                  View
-                </Button>
-              </div>
+              <CarCard key={car.id} car={car} />
             ))}
           </CardContent>
         </Card>
@@ -523,6 +516,75 @@ export default function DashboardPage() {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("dashboard");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [data, setData] = useState<DashboardData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        const response = await fetch("/api/dashboard");
+        if (!response.ok) {
+          throw new Error("Failed to fetch dashboard data");
+        }
+        const dashboardData = await response.json();
+        // Ensure each car has a fallback image URL
+        dashboardData.recommendedCars = dashboardData.recommendedCars.map(
+          (car) => ({
+            ...car,
+            image_url:
+              car.image_url ||
+              `https://source.unsplash.com/800x600/?car-${car.category.toLowerCase()}&sig=${
+                car.id
+              }`,
+          })
+        );
+        dashboardData.currentBookings = dashboardData.currentBookings.map(
+          (booking) => ({
+            ...booking,
+            car: {
+              ...booking.car,
+              image_url:
+                booking.car.image_url ||
+                `https://source.unsplash.com/800x600/?car-${booking.car.category.toLowerCase()}&sig=${
+                  booking.car.id
+                }`,
+            },
+          })
+        );
+        setData(dashboardData);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "An error occurred");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <Card className="p-6">
+          <h2 className="text-xl font-semibold text-red-600">Error</h2>
+          <p className="mt-2">{error}</p>
+        </Card>
+      </div>
+    );
+  }
+
+  if (!data) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -738,19 +800,19 @@ export default function DashboardPage() {
                         <CardTitle>Current Rentals</CardTitle>
                       </CardHeader>
                       <CardContent>
-                        {mockBookings
-                          .filter((b) => b.status === "active")
-                          .map((booking) => (
-                            <div key={booking.id} className="mb-2">
-                              <div className="font-semibold">{booking.car}</div>
-                              <div>
-                                Return: {new Date(booking.end).toLocaleString()}
-                              </div>
-                              <Button size="sm" className="mt-1">
-                                Extend
-                              </Button>
+                        {data.currentBookings.map((booking) => (
+                          <div key={booking.id} className="mb-2">
+                            <div className="font-semibold">
+                              {booking.car.name}
                             </div>
-                          ))}
+                            <div>
+                              Return: {new Date(booking.end).toLocaleString()}
+                            </div>
+                            <Button size="sm" className="mt-1">
+                              Extend
+                            </Button>
+                          </div>
+                        ))}
                       </CardContent>
                     </Card>
 
@@ -760,25 +822,24 @@ export default function DashboardPage() {
                         <CardTitle>Upcoming Rentals</CardTitle>
                       </CardHeader>
                       <CardContent>
-                        {mockBookings
-                          .filter((b) => b.status === "upcoming")
-                          .map((booking) => (
-                            <div key={booking.id} className="mb-2">
-                              <div className="font-semibold">{booking.car}</div>
-                              <div>
-                                Pickup:{" "}
-                                {new Date(booking.start).toLocaleString()}
-                              </div>
-                              <div className="flex gap-2">
-                                <Button size="sm" variant="outline">
-                                  Modify
-                                </Button>
-                                <Button size="sm" variant="destructive">
-                                  Cancel
-                                </Button>
-                              </div>
+                        {data.currentBookings.map((booking) => (
+                          <div key={booking.id} className="mb-2">
+                            <div className="font-semibold">
+                              {booking.car.name}
                             </div>
-                          ))}
+                            <div>
+                              Pickup: {new Date(booking.start).toLocaleString()}
+                            </div>
+                            <div className="flex gap-2">
+                              <Button size="sm" variant="outline">
+                                Modify
+                              </Button>
+                              <Button size="sm" variant="destructive">
+                                Cancel
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
                       </CardContent>
                     </Card>
                   </div>
@@ -794,54 +855,15 @@ export default function DashboardPage() {
                       >
                         <path
                           fillRule="evenodd"
-                          d="M10 1c-1.828 0-3.623.149-5.371.435a.75.75 0 00-.629.74v.387c-.827.157-1.642.345-2.445.564a.75.75 0 00-.552.698V5c0 2.056.754 3.931 1.995 5.357a.75.75 0 001.108.095l.346-.31c.798.235 1.626.452 2.472.647a.75.75 0 00.588-.022l.452-.211c.162.064.329.127.498.189a.75.75 0 00.63-.111l.346-.31c.798.235 1.626.452 2.472.647a.75.75 0 00.588-.022l.452-.211a.75.75 0 00.424-.806l-.024-.168c-.386.087-.78.167-1.18.239a.75.75 0 01-.305-1.469c.5-.103.992-.214 1.475-.333a.75.75 0 00.354-1.246c-.182-.196-.37-.387-.563-.573a.75.75 0 00-1.025-.04l-.146.129c-.262-.293-.534-.574-.816-.843a.75.75 0 00-1.025-.04l-.146.129c-.262-.293-.534-.574-.816-.843a.75.75 0 00-1.025-.04l-.146.129c-.262-.293-.534-.574-.816-.843a.75.75 0 00-1.025-.04l-.146.129c-.262-.293-.534-.574-.816-.843a.75.75 0 00-1.025-.04l-.146.129c-.262-.293-.534-.574-.816-.843a.75.75 0 00-1.025-.04l-.146.129z"
+                          d="M10 1c-1.828 0-3.623.149-5.371.435a.75.75 0 00-.629.74v.387c-.827.157-1.642.345-2.445.564a.75.75 0 00-.552.698V5c0 2.056.754 3.931 1.995 5.357a.75.75 0 001.108.095l.346-.31c.798.235 1.626.452 2.472.647a.75.75 0 00.588-.022l.452-.211c.162.064.329.127.498.189a.75.75 0 00.63-.111l.346-.31c.798.235 1.626.452 2.472.647a.75.75 0 00.588-.022l.452-.211a.75.75 0 00.424-.806l-.024-.168c-.386.087-.78.167-1.18.239a.75.75 0 01-.305-1.469c.5-.103.992-.214 1.475-.333a.75.75 0 00.354-1.246c-.182-.196-.37-.387-.563-.573a.75.75 0 00-1.025-.04l-.146.129c-.262-.293-.534-.574-.816-.843a.75.75 0 00-1.025-.04l-.146.129c-.262-.293-.534-.574-.816-.843a.75.75 0 00-1.025-.04l-.146.129c-.262-.293-.534-.574-.816-.843a.75.75 0 00-1.025-.04l-.146.129z"
                           clipRule="evenodd"
                         />
                       </svg>
                       Recommended for You
                     </h2>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-                      {mockRecommendedCars.map((car) => (
-                        <Card
-                          key={car.id}
-                          className="group overflow-hidden hover:shadow-lg transition-all duration-200"
-                        >
-                          <div className="aspect-[4/3] relative bg-gray-100 overflow-hidden">
-                            <img
-                              src={car.image}
-                              alt={car.name}
-                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-200"
-                            />
-                          </div>
-                          <CardHeader>
-                            <CardTitle className="text-lg">
-                              {car.name}
-                            </CardTitle>
-                            <CardDescription className="flex items-center gap-2">
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                viewBox="0 0 20 20"
-                                fill="currentColor"
-                                className="w-4 h-4 text-red-500"
-                              >
-                                <path
-                                  fillRule="evenodd"
-                                  d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.732 6.232a2.5 2.5 0 013.536 0 .75.75 0 101.06-1.06A4 4 0 006.5 8v.165c0 .364.034.728.1 1.085h-.35a.75.75 0 000 1.5h.737a5.25 5.25 0 01-.367 3.072l-.055.123a.75.75 0 00.848 1.037l1.272-.283a3.493 3.493 0 011.604.021 4.992 4.992 0 002.422 0l.97-.242a.75.75 0 00-.363-1.456l-.971.243a3.491 3.491 0 01-1.694 0 4.992 4.992 0 00-2.258-.038c.19-.811.227-1.651.111-2.477h2.914a.75.75 0 000-1.5h-2.89a3.776 3.776 0 01-.094-.83V8a2.5 2.5 0 00-.732-1.768z"
-                                  clipRule="evenodd"
-                                />
-                              </svg>
-                              {car.price}
-                            </CardDescription>
-                          </CardHeader>
-                          <CardContent>
-                            <Button
-                              variant="outline"
-                              className="w-full hover:bg-red-50 hover:text-red-600 transition-colors"
-                            >
-                              View Details
-                            </Button>
-                          </CardContent>
-                        </Card>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {data.recommendedCars.slice(0, 2).map((car) => (
+                        <CarCard key={car.id} car={car} />
                       ))}
                     </div>
                   </div>
