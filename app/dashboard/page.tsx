@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 const TABS = [
   {
     key: "dashboard",
-    label: "Dashboard Overview",
+    label: "Dashboard",
     icon: (
       <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -61,7 +61,14 @@ const TABS = [
   },
   {
     key: "ai",
-    label: "MileAI Assistant",
+    label: (
+      <div className="flex items-center gap-2">
+        Mile AI
+        <span className="px-1.5 py-0.5 text-[10px] font-semibold bg-red-100 text-red-600 rounded-full">
+          BETA
+        </span>
+      </div>
+    ),
     icon: (
       <svg
         xmlns="http://www.w3.org/2000/svg"
