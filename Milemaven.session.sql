@@ -1,2 +1,10 @@
-SELECT * FROM users;
+SELECT * FROM cars;
+
+
+
+
+
+
+
+
 

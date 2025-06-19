@@ -76,7 +76,7 @@ export default function Footer() {
             <div className="space-y-3">
               <div className="flex items-center space-x-3">
                 <Phone className="w-5 h-5 text-red-600" />
-                <span className="text-gray-300">+254 700 123 456</span>
+                <span className="text-gray-300">+254 724 636 436</span>
               </div>
               <div className="flex items-center space-x-3">
                 <Mail className="w-5 h-5 text-red-600" />
@@ -84,7 +84,9 @@ export default function Footer() {
               </div>
               <div className="flex items-center space-x-3">
                 <MapPin className="w-5 h-5 text-red-600" />
-                <span className="text-gray-300">Nairobi, Kenya.</span>
+                <span className="text-gray-300">
+                  Westlands, Nairobi, Kenya.
+                </span>
               </div>
             </div>
           </div>

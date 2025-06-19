@@ -63,7 +63,7 @@ const TABS = [
     key: "ai",
     label: (
       <div className="flex items-center gap-2">
-        Mile AI
+        Maven AI
         <span className="px-1.5 py-0.5 text-[10px] font-semibold bg-red-100 text-red-600 rounded-full">
           BETA
         </span>
@@ -198,9 +198,15 @@ const mockRecommendedCars = [
   },
 ];
 
-function UserProfileCard({ user }: { user: any }) {
+function UserProfileCard({
+  user,
+  onEditProfile,
+}: {
+  user: any;
+  onEditProfile: () => void;
+}) {
   return (
-    <div className="mb-8 text-center relative z-10">
+    <div className="px-4 mb-8 text-center relative z-10">
       <div className="relative inline-block group mb-3">
         <div className="w-20 h-20 rounded-full overflow-hidden border-4 border-white/80 shadow-lg mx-auto backdrop-blur-sm">
           <img
@@ -231,14 +237,15 @@ function UserProfileCard({ user }: { user: any }) {
       <h3 className="font-semibold text-lg text-gray-900">
         {user?.name || mockProfile.name}
       </h3>
-      <p className="text-sm text-gray-500 mb-3">
+      <p className="text-sm text-gray-500 mb-4">
         {user?.email || mockProfile.email}
       </p>
-      <div className="space-y-2">
+      <div className="px-2">
         <Button
           variant="outline"
           size="sm"
-          className="w-full text-sm backdrop-blur-sm bg-white/80 hover:bg-white/90"
+          className="w-full text-sm backdrop-blur-sm bg-white/80 hover:bg-white/90 border border-gray-200"
+          onClick={onEditProfile}
         >
           Edit Profile
         </Button>
@@ -514,80 +521,349 @@ function RecommendedCars() {
 
 export default function DashboardPage() {
   const { user } = useAuth();
-  const [selectedTab, setSelectedTab] = useState("dashboard");
-
-  let content;
-  switch (selectedTab) {
-    case "dashboard":
-      content = <DashboardOverview user={user} />;
-      break;
-    case "bookings":
-      content = <BookingsSection />;
-      break;
-    case "history":
-      content = <HistorySection />;
-      break;
-    case "ai":
-      content = <AISection />;
-      break;
-    case "profile":
-      content = <ProfileSection user={user} />;
-      break;
-    case "financial":
-      content = <FinancialSection />;
-      break;
-    default:
-      content = <DashboardOverview user={user} />;
-  }
+  const [activeTab, setActiveTab] = useState("dashboard");
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
-      <div className="flex gap-6">
-        {/* Sidebar with glass effect */}
-        <aside className="w-64 flex-shrink-0">
-          <div className="sticky top-4 backdrop-blur-xl bg-white/70 rounded-xl border border-white/20 shadow-lg p-4 overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-white/50 via-transparent to-transparent pointer-events-none" />
+    <div className="min-h-screen bg-gray-50">
+      {/* Mobile Menu Button - Aligned with container */}
+      <div className="lg:hidden fixed top-20 z-20 w-full px-4 left-0 right-0">
+        <div className="max-w-7xl mx-auto">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="bg-white"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={1.5}
+              stroke="currentColor"
+              className="w-6 h-6"
+            >
+              {isMobileMenuOpen ? (
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              ) : (
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
+                />
+              )}
+            </svg>
+          </Button>
+        </div>
+      </div>
 
-            <UserProfileCard user={user} />
-            <nav className="space-y-1 relative">
-              {TABS.map((tab, index) => (
-                <div key={tab.key}>
-                  <button
-                    onClick={() => setSelectedTab(tab.key)}
-                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 text-left relative overflow-hidden ${
-                      selectedTab === tab.key
-                        ? "bg-red-500/10 text-red-600 shadow-sm backdrop-blur-md"
-                        : "text-gray-600 hover:bg-white/40 hover:shadow-sm hover:backdrop-blur-sm"
-                    }`}
-                  >
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                    <span className="relative z-10">{tab.icon}</span>
-                    <span className="text-sm font-medium relative z-10">
-                      {tab.label}
-                    </span>
-                  </button>
-                  {/* Add divider except for last item */}
-                  {index < TABS.length - 1 && (
-                    <div className="h-px bg-gray-200/50 my-1 mx-4" />
-                  )}
-                </div>
-              ))}
-            </nav>
-          </div>
-        </aside>
-
-        {/* Main Content */}
-        <main className="flex-1 min-w-0">
-          <div className="space-y-6">
-            <div className="[&_div.card]:backdrop-blur-md [&_div.card]:bg-white/70 [&_div.card]:border-white/20 [&_div.card]:shadow-lg">
-              {content}
+      {/* Main Container with consistent padding */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col lg:flex-row pt-16">
+          {/* Sidebar - Now with adjusted z-index and consistent spacing */}
+          <div
+            className={`
+            fixed lg:static w-[280px] bg-white z-10 mt-16 lg:mt-0
+            transition-transform duration-300 ease-in-out
+            shadow-[0_4px_12px_0_rgba(0,0,0,0.05)] border-r border-gray-100
+            ${
+              isMobileMenuOpen
+                ? "translate-x-0"
+                : "-translate-x-full lg:translate-x-0"
+            }
+          `}
+          >
+            <div className="h-[calc(100vh-4rem)] overflow-y-auto">
+              <div className="flex flex-col h-full py-4">
+                <UserProfileCard
+                  user={user}
+                  onEditProfile={() => setActiveTab("profile")}
+                />
+                <nav className="px-3 flex-1">
+                  {TABS.map((tab) => (
+                    <button
+                      key={tab.key}
+                      onClick={() => {
+                        setActiveTab(tab.key);
+                        setIsMobileMenuOpen(false);
+                      }}
+                      className={`w-full flex items-center gap-3 px-4 py-2.5 mb-1 text-sm font-medium rounded-lg transition-colors ${
+                        activeTab === tab.key
+                          ? "bg-red-50 text-red-600"
+                          : "text-gray-600 hover:bg-gray-50"
+                      }`}
+                    >
+                      <span className="opacity-75">{tab.icon}</span>
+                      <span>{tab.label}</span>
+                    </button>
+                  ))}
+                </nav>
+              </div>
             </div>
           </div>
-        </main>
 
-        {/* Recommended Cars with glass effect */}
-        <RecommendedCars />
+          {/* Main Content - With proper spacing for all screen sizes */}
+          <div className="flex-1 lg:pl-8 pt-4 w-full">
+            <div className="py-6 space-y-6">
+              {activeTab === "dashboard" && (
+                <div className="space-y-6">
+                  {/* Welcome Section */}
+                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-6">
+                    <div>
+                      <h1 className="text-2xl font-semibold text-gray-900">
+                        Welcome back, {user?.name || mockProfile.name}!
+                      </h1>
+                      <p className="text-gray-500 mt-1">
+                        Here's what's happening with your rentals
+                      </p>
+                    </div>
+                    <Button
+                      onClick={() => (window.location.href = "/cars")}
+                      className="bg-red-600 hover:bg-red-700 text-white w-full sm:w-auto"
+                    >
+                      Book a New Car
+                    </Button>
+                  </div>
+
+                  {/* Stats Grid - Improved responsive grid */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                    <Card className="relative overflow-hidden group transition-all duration-200 hover:shadow-lg">
+                      <div className="absolute inset-0 bg-gradient-to-br from-red-500 to-red-600" />
+                      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 bg-gradient-to-br from-red-600 to-red-700 transition-opacity duration-200" />
+                      <CardHeader className="relative z-10">
+                        <div className="flex items-center justify-between">
+                          <CardTitle className="text-lg font-medium text-white">
+                            Active Rentals
+                          </CardTitle>
+                          <div className="p-2 bg-white/10 rounded-lg">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              viewBox="0 0 24 24"
+                              fill="currentColor"
+                              className="w-5 h-5 text-white"
+                            >
+                              <path d="M3.375 4.5C2.339 4.5 1.5 5.34 1.5 6.375V13.5h12V6.375c0-1.036-.84-1.875-1.875-1.875h-8.25zM13.5 15h-12v2.625c0 1.035.84 1.875 1.875 1.875h8.25c1.035 0 1.875-.84 1.875-1.875V15z" />
+                            </svg>
+                          </div>
+                        </div>
+                        <div className="mt-4">
+                          <span className="text-4xl font-bold text-white">
+                            1
+                          </span>
+                          <p className="text-white/80 text-sm mt-1">
+                            Vehicle Currently Rented
+                          </p>
+                        </div>
+                      </CardHeader>
+                    </Card>
+
+                    <Card className="relative overflow-hidden group transition-all duration-200 hover:shadow-lg">
+                      <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-blue-600" />
+                      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 bg-gradient-to-br from-blue-600 to-blue-700 transition-opacity duration-200" />
+                      <CardHeader className="relative z-10">
+                        <div className="flex items-center justify-between">
+                          <CardTitle className="text-lg font-medium text-white">
+                            Loyalty Points
+                          </CardTitle>
+                          <div className="p-2 bg-white/10 rounded-lg">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              viewBox="0 0 24 24"
+                              fill="currentColor"
+                              className="w-5 h-5 text-white"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                          </div>
+                        </div>
+                        <div className="mt-4">
+                          <span className="text-4xl font-bold text-white">
+                            1,200
+                          </span>
+                          <p className="text-white/80 text-sm mt-1">
+                            Points Available
+                          </p>
+                        </div>
+                      </CardHeader>
+                    </Card>
+
+                    <Card className="relative overflow-hidden group transition-all duration-200 hover:shadow-lg">
+                      <div className="absolute inset-0 bg-gradient-to-br from-green-500 to-green-600" />
+                      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 bg-gradient-to-br from-green-600 to-green-700 transition-opacity duration-200" />
+                      <CardHeader className="relative z-10">
+                        <div className="flex items-center justify-between">
+                          <CardTitle className="text-lg font-medium text-white">
+                            Total Trips
+                          </CardTitle>
+                          <div className="p-2 bg-white/10 rounded-lg">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              viewBox="0 0 24 24"
+                              fill="currentColor"
+                              className="w-5 h-5 text-white"
+                            >
+                              <path
+                                fillRule="evenodd"
+                                d="M11.54 22.351l.07.04.028.016a.76.76 0 00.723 0l.028-.015.071-.041a16.975 16.975 0 001.144-.742 19.58 19.58 0 002.683-2.282c1.944-1.99 3.963-4.98 3.963-8.827a8.25 8.25 0 00-16.5 0c0 3.846 2.02 6.837 3.963 8.827a19.58 19.58 0 002.682 2.282 16.975 16.975 0 001.145.742zM12 13.5a3 3 0 100-6 3 3 0 000 6z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                          </div>
+                        </div>
+                        <div className="mt-4">
+                          <span className="text-4xl font-bold text-white">
+                            3
+                          </span>
+                          <p className="text-white/80 text-sm mt-1">
+                            Completed Rentals
+                          </p>
+                        </div>
+                      </CardHeader>
+                    </Card>
+                  </div>
+
+                  {/* Current and Upcoming Section - Better spacing */}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+                    {/* Current Rentals Card */}
+                    <Card className="col-span-1">
+                      <CardHeader>
+                        <CardTitle>Current Rentals</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        {mockBookings
+                          .filter((b) => b.status === "active")
+                          .map((booking) => (
+                            <div key={booking.id} className="mb-2">
+                              <div className="font-semibold">{booking.car}</div>
+                              <div>
+                                Return: {new Date(booking.end).toLocaleString()}
+                              </div>
+                              <Button size="sm" className="mt-1">
+                                Extend
+                              </Button>
+                            </div>
+                          ))}
+                      </CardContent>
+                    </Card>
+
+                    {/* Upcoming Rentals Card */}
+                    <Card className="col-span-1">
+                      <CardHeader>
+                        <CardTitle>Upcoming Rentals</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        {mockBookings
+                          .filter((b) => b.status === "upcoming")
+                          .map((booking) => (
+                            <div key={booking.id} className="mb-2">
+                              <div className="font-semibold">{booking.car}</div>
+                              <div>
+                                Pickup:{" "}
+                                {new Date(booking.start).toLocaleString()}
+                              </div>
+                              <div className="flex gap-2">
+                                <Button size="sm" variant="outline">
+                                  Modify
+                                </Button>
+                                <Button size="sm" variant="destructive">
+                                  Cancel
+                                </Button>
+                              </div>
+                            </div>
+                          ))}
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  {/* Recommended Cars Section - Responsive grid */}
+                  <div>
+                    <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                        className="w-5 h-5 text-red-500"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M10 1c-1.828 0-3.623.149-5.371.435a.75.75 0 00-.629.74v.387c-.827.157-1.642.345-2.445.564a.75.75 0 00-.552.698V5c0 2.056.754 3.931 1.995 5.357a.75.75 0 001.108.095l.346-.31c.798.235 1.626.452 2.472.647a.75.75 0 00.588-.022l.452-.211c.162.064.329.127.498.189a.75.75 0 00.63-.111l.346-.31c.798.235 1.626.452 2.472.647a.75.75 0 00.588-.022l.452-.211a.75.75 0 00.424-.806l-.024-.168c-.386.087-.78.167-1.18.239a.75.75 0 01-.305-1.469c.5-.103.992-.214 1.475-.333a.75.75 0 00.354-1.246c-.182-.196-.37-.387-.563-.573a.75.75 0 00-1.025-.04l-.146.129c-.262-.293-.534-.574-.816-.843a.75.75 0 00-1.025-.04l-.146.129c-.262-.293-.534-.574-.816-.843a.75.75 0 00-1.025-.04l-.146.129c-.262-.293-.534-.574-.816-.843a.75.75 0 00-1.025-.04l-.146.129c-.262-.293-.534-.574-.816-.843a.75.75 0 00-1.025-.04l-.146.129c-.262-.293-.534-.574-.816-.843a.75.75 0 00-1.025-.04l-.146.129z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                      Recommended for You
+                    </h2>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                      {mockRecommendedCars.map((car) => (
+                        <Card
+                          key={car.id}
+                          className="group overflow-hidden hover:shadow-lg transition-all duration-200"
+                        >
+                          <div className="aspect-[4/3] relative bg-gray-100 overflow-hidden">
+                            <img
+                              src={car.image}
+                              alt={car.name}
+                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-200"
+                            />
+                          </div>
+                          <CardHeader>
+                            <CardTitle className="text-lg">
+                              {car.name}
+                            </CardTitle>
+                            <CardDescription className="flex items-center gap-2">
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 20 20"
+                                fill="currentColor"
+                                className="w-4 h-4 text-red-500"
+                              >
+                                <path
+                                  fillRule="evenodd"
+                                  d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.732 6.232a2.5 2.5 0 013.536 0 .75.75 0 101.06-1.06A4 4 0 006.5 8v.165c0 .364.034.728.1 1.085h-.35a.75.75 0 000 1.5h.737a5.25 5.25 0 01-.367 3.072l-.055.123a.75.75 0 00.848 1.037l1.272-.283a3.493 3.493 0 011.604.021 4.992 4.992 0 002.422 0l.97-.242a.75.75 0 00-.363-1.456l-.971.243a3.491 3.491 0 01-1.694 0 4.992 4.992 0 00-2.258-.038c.19-.811.227-1.651.111-2.477h2.914a.75.75 0 000-1.5h-2.89a3.776 3.776 0 01-.094-.83V8a2.5 2.5 0 00-.732-1.768z"
+                                  clipRule="evenodd"
+                                />
+                              </svg>
+                              {car.price}
+                            </CardDescription>
+                          </CardHeader>
+                          <CardContent>
+                            <Button
+                              variant="outline"
+                              className="w-full hover:bg-red-50 hover:text-red-600 transition-colors"
+                            >
+                              View Details
+                            </Button>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+              {activeTab === "bookings" && <BookingsSection />}
+              {activeTab === "history" && <HistorySection />}
+              {activeTab === "ai" && <AISection />}
+              {activeTab === "profile" && <ProfileSection user={user} />}
+              {activeTab === "financial" && <FinancialSection />}
+            </div>
+          </div>
+        </div>
       </div>
+
+      {/* Overlay for mobile menu */}
+      {isMobileMenuOpen && (
+        <div
+          className="fixed inset-0 bg-black/20 z-5 lg:hidden"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
     </div>
   );
 }
