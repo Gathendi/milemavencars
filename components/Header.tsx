@@ -1,14 +1,14 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import Link from "next/link"
-import { useAuth } from "@/lib/auth-context"
-import { Button } from "@/components/ui/button"
-import { Menu, X, User, LogOut, Car } from "lucide-react"
+import { useState } from "react";
+import Link from "next/link";
+import { useAuth } from "@/lib/auth-context";
+import { Button } from "@/components/ui/button";
+import { Menu, X, User, LogOut, Car } from "lucide-react";
 
 export default function Header() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const { user, logout } = useAuth()
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { user, logout } = useAuth();
 
   return (
     <header className="bg-black text-white shadow-lg sticky top-0 z-40">
@@ -28,14 +28,23 @@ export default function Header() {
             <Link href="/cars" className="hover:text-red-600 transition-colors">
               Cars
             </Link>
-            <Link href="/bookings" className="hover:text-red-600 transition-colors">
+            <Link
+              href="/bookings"
+              className="hover:text-red-600 transition-colors"
+            >
               My Bookings
             </Link>
-            <Link href="/contact" className="hover:text-red-600 transition-colors">
+            <Link
+              href="/contact"
+              className="hover:text-red-600 transition-colors"
+            >
               Contact
             </Link>
             {user?.role === "admin" && (
-              <Link href="/admin" className="hover:text-red-600 transition-colors">
+              <Link
+                href="/admin"
+                className="hover:text-red-600 transition-colors"
+              >
                 Admin
               </Link>
             )}
@@ -47,7 +56,7 @@ export default function Header() {
               <div className="flex items-center space-x-4">
                 <span className="flex items-center space-x-2">
                   <User size={20} />
-                  <span>{user.name}</span>
+                  <span>Welcome back, {user.name.split(" ")[0]}</span>
                 </span>
                 <Button onClick={logout} variant="ghost" size="sm">
                   <LogOut size={16} className="mr-2" />
@@ -67,7 +76,10 @@ export default function Header() {
           </div>
 
           {/* Mobile Menu Button */}
-          <button className="md:hidden" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+          <button
+            className="md:hidden"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+          >
             {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
@@ -79,22 +91,38 @@ export default function Header() {
               <Link href="/" className="hover:text-red-600 transition-colors">
                 Home
               </Link>
-              <Link href="/cars" className="hover:text-red-600 transition-colors">
+              <Link
+                href="/cars"
+                className="hover:text-red-600 transition-colors"
+              >
                 Cars
               </Link>
-              <Link href="/bookings" className="hover:text-red-600 transition-colors">
+              <Link
+                href="/bookings"
+                className="hover:text-red-600 transition-colors"
+              >
                 My Bookings
               </Link>
-              <Link href="/contact" className="hover:text-red-600 transition-colors">
+              <Link
+                href="/contact"
+                className="hover:text-red-600 transition-colors"
+              >
                 Contact
               </Link>
               {user?.role === "admin" && (
-                <Link href="/admin" className="hover:text-red-600 transition-colors">
+                <Link
+                  href="/admin"
+                  className="hover:text-red-600 transition-colors"
+                >
                   Admin
                 </Link>
               )}
               {user ? (
-                <Button onClick={logout} variant="ghost" className="justify-start">
+                <Button
+                  onClick={logout}
+                  variant="ghost"
+                  className="justify-start"
+                >
                   <LogOut size={16} className="mr-2" />
                   Logout
                 </Button>
@@ -115,5 +143,5 @@ export default function Header() {
         )}
       </div>
     </header>
-  )
+  );
 }
