@@ -1,5 +1,4 @@
 -- MileMaven Database Schema
-
 -- Users table
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
@@ -11,13 +10,12 @@ CREATE TABLE users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-
 -- Cars table
 CREATE TABLE cars (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     category VARCHAR(50) NOT NULL,
-    price DECIMAL(10,2) NOT NULL,
+    price DECIMAL(10, 2) NOT NULL,
     image_url TEXT,
     seats INTEGER NOT NULL,
     transmission VARCHAR(20) NOT NULL,
@@ -27,7 +25,6 @@ CREATE TABLE cars (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-
 -- Bookings table
 CREATE TABLE bookings (
     id SERIAL PRIMARY KEY,
@@ -42,12 +39,13 @@ CREATE TABLE bookings (
     driver_license VARCHAR(100) NOT NULL,
     phone_number VARCHAR(20) NOT NULL,
     special_requests TEXT,
-    total_amount DECIMAL(10,2) NOT NULL,
-    status VARCHAR(20) DEFAULT 'pending' CHECK (status IN ('pending', 'confirmed', 'cancelled', 'completed')),
+    total_amount DECIMAL(10, 2) NOT NULL,
+    status VARCHAR(20) DEFAULT 'pending' CHECK (
+        status IN ('pending', 'confirmed', 'cancelled', 'completed')
+    ),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-
 -- Contact messages table
 CREATE TABLE contact_messages (
     id SERIAL PRIMARY KEY,
@@ -59,7 +57,16 @@ CREATE TABLE contact_messages (
     status VARCHAR(20) DEFAULT 'new' CHECK (status IN ('new', 'read', 'replied')),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-
+-- Create password_resets table
+CREATE TABLE IF NOT EXISTS password_resets (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id),
+    token VARCHAR(255) NOT NULL UNIQUE,
+    expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    used BOOLEAN DEFAULT false,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(user_id)
+);
 -- Create indexes for better performance
 CREATE INDEX idx_users_email ON users(email);
 CREATE INDEX idx_cars_category ON cars(category);

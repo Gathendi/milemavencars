@@ -186,7 +186,8 @@ const mockRecommendedCars = [
     name: "Tesla Model 3",
     category: "Sedan",
     price: 20000,
-    image_url: "https://source.unsplash.com/800x600/?tesla-model-3",
+    image_url:
+      "https://images.unsplash.com/photo-1619767886558-efdc259aed0c?auto=format&fit=crop&q=80",
     seats: 5,
     transmission: "Automatic",
     fuel_type: "Electric",
@@ -198,7 +199,8 @@ const mockRecommendedCars = [
     name: "Toyota Land Cruiser",
     category: "SUV",
     price: 25000,
-    image_url: "https://source.unsplash.com/800x600/?toyota-land-cruiser",
+    image_url:
+      "https://images.unsplash.com/photo-1625776903560-2ded71dd8833?auto=format&fit=crop&q=80",
     seats: 8,
     transmission: "Automatic",
     fuel_type: "Diesel",
@@ -534,9 +536,7 @@ export default function DashboardPage() {
             ...car,
             image_url:
               car.image_url ||
-              `https://source.unsplash.com/800x600/?car-${car.category.toLowerCase()}&sig=${
-                car.id
-              }`,
+              `https://images.unsplash.com/photo-1550355291-bbee04a92027?auto=format&fit=crop&q=80&w=800&h=600&sig=${car.id}`,
           })
         );
         dashboardData.currentBookings = dashboardData.currentBookings.map(
@@ -546,9 +546,7 @@ export default function DashboardPage() {
               ...booking.car,
               image_url:
                 booking.car.image_url ||
-                `https://source.unsplash.com/800x600/?car-${booking.car.category.toLowerCase()}&sig=${
-                  booking.car.id
-                }`,
+                `https://images.unsplash.com/photo-1550355291-bbee04a92027?auto=format&fit=crop&q=80&w=800&h=600&sig=${booking.car.id}`,
             },
           })
         );
