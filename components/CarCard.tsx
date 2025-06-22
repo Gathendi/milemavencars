@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useState } from "react";
-import { X } from "lucide-react";
+import { X, Users, Gauge, Fuel, Tag } from "lucide-react";
 import CarDetails from "./CarDetails";
 
 interface Car {
@@ -44,50 +44,47 @@ export default function CarCard({
             className="w-full h-48 object-cover"
           />
           {!car.available && (
-            <div className="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded-full text-sm font-medium">
+            <div className="absolute top-2 right-2 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-medium">
               Not Available
             </div>
           )}
           {isAdmin && (
             <div className="absolute bottom-2 right-2 flex space-x-2">
-              <div className="bg-white/90 backdrop-blur-sm text-sm px-2 py-1 rounded-full">
-                Total Bookings: {car.total_bookings || 0}
-              </div>
-              <div className="bg-white/90 backdrop-blur-sm text-sm px-2 py-1 rounded-full">
-                Active: {car.active_bookings || 0}
+              <div className="bg-white/90 backdrop-blur-sm text-sm px-3 py-1 rounded-full">
+                {car.total_bookings || 0} bookings
               </div>
             </div>
           )}
         </div>
 
-        <div className="p-6">
-          <h3 className="text-xl font-semibold mb-2">{car.name}</h3>
-          <div className="space-y-3">
-            <div className="flex justify-between items-center text-sm">
-              <span className="text-gray-600">Category</span>
-              <span className="font-medium">{car.category}</span>
-            </div>
-            <div className="flex justify-between items-center text-sm">
-              <span className="text-gray-600">Price per day</span>
-              <span className="font-medium text-red-600">
-                KSh {car.price.toLocaleString()}
-              </span>
-            </div>
-            <div className="flex justify-between items-center text-sm">
-              <span className="text-gray-600">Seats</span>
-              <span className="font-medium">{car.seats}</span>
-            </div>
-            <div className="flex justify-between items-center text-sm">
-              <span className="text-gray-600">Transmission</span>
-              <span className="font-medium">{car.transmission}</span>
-            </div>
-            <div className="flex justify-between items-center text-sm">
-              <span className="text-gray-600">Fuel Type</span>
-              <span className="font-medium">{car.fuel_type}</span>
+        <div className="p-4">
+          <div className="flex justify-between items-start mb-4">
+            <h3 className="text-lg font-semibold">{car.name}</h3>
+            <div className="text-red-600 font-semibold">
+              Ksh {car.price.toLocaleString()}
             </div>
           </div>
 
-          <div className="mt-6 space-y-3">
+          <div className="grid grid-cols-2 gap-3 text-sm text-gray-600 mb-4">
+            <div className="flex items-center">
+              <Tag className="w-4 h-4 mr-2 text-gray-400" />
+              <span>{car.category}</span>
+            </div>
+            <div className="flex items-center">
+              <Users className="w-4 h-4 mr-2 text-gray-400" />
+              <span>{car.seats} seats</span>
+            </div>
+            <div className="flex items-center">
+              <Gauge className="w-4 h-4 mr-2 text-gray-400" />
+              <span>{car.transmission}</span>
+            </div>
+            <div className="flex items-center">
+              <Fuel className="w-4 h-4 mr-2 text-gray-400" />
+              <span>{car.fuel_type}</span>
+            </div>
+          </div>
+
+          <div className="space-y-2">
             {isAdmin ? (
               <div className="flex justify-end space-x-2">
                 <Button
@@ -109,15 +106,15 @@ export default function CarCard({
               <>
                 <button
                   onClick={() => setShowModal(true)}
-                  className="w-full border border-red-600 text-red-600 hover:bg-red-50 font-semibold rounded-lg px-6 py-3 transition-colors"
+                  className="w-full border border-red-600 text-red-600 hover:bg-red-50 font-medium rounded-lg px-4 py-2 transition-colors"
                   type="button"
                 >
-                  Show More Details
+                  More Details
                 </button>
                 <Link href={`/book/${car.id}`} className="block w-full">
                   <button
                     disabled={!car.available}
-                    className={`w-full px-6 py-3 rounded-lg font-semibold transition-colors ${
+                    className={`w-full px-4 py-2 rounded-lg font-medium transition-colors ${
                       car.available
                         ? "bg-red-600 hover:bg-red-700 text-white"
                         : "bg-gray-300 text-gray-500 cursor-not-allowed"
