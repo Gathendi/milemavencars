@@ -30,33 +30,36 @@ export async function POST(request: NextRequest) {
     const {
       name,
       category,
-      price_per_day,
+      price,
+      seats,
+      transmission,
+      fuel_type,
       image_url,
-      description,
-      features,
-      specifications,
+      description
     } = body;
 
     const result = await db.query(
       `INSERT INTO cars (
         name,
         category,
-        price_per_day,
+        price,
+        seats,
+        transmission,
+        fuel_type,
         image_url,
         description,
-        features,
-        specifications,
         available
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, true)
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, true)
       RETURNING *`,
       [
         name,
         category,
-        price_per_day,
+        price,
+        seats,
+        transmission,
+        fuel_type,
         image_url,
-        description,
-        features,
-        specifications,
+        description
       ]
     );
 
