@@ -3,6 +3,18 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Users,
+  Car,
+  CalendarCheck,
+  TrendingUp,
+  AlertCircle,
+  Clock,
+  DollarSign,
+  ArrowUpRight,
+  ArrowDownRight,
+  Loader2,
+} from "lucide-react";
 
 // Mock data - Replace with actual API calls
 const mockStats = {
@@ -53,64 +65,105 @@ const mockStats = {
 function StatCard({
   title,
   value,
-  icon,
-  color = "bg-white",
-  textColor = "text-gray-700",
+  icon: Icon,
+  trend,
+  trendValue,
+  description,
+  className = "",
 }: {
   title: string;
   value: string | number;
-  icon?: React.ReactNode;
-  color?: string;
-  textColor?: string;
+  icon: any;
+  trend?: "up" | "down";
+  trendValue?: string;
+  description?: string;
+  className?: string;
 }) {
   return (
-    <Card className={`${color}`}>
+    <Card className={`overflow-hidden ${className}`}>
       <CardContent className="p-6">
         <div className="flex items-center justify-between">
-          {icon && <span className="text-gray-500">{icon}</span>}
-          <div className="text-right flex-1">
-            <p className="text-sm font-medium text-gray-500">{title}</p>
-            <p className={`text-2xl font-bold mt-1 ${textColor}`}>{value}</p>
+          <div className="w-12 h-12 rounded-full flex items-center justify-center bg-red-50">
+            <Icon className="w-6 h-6 text-red-600" />
           </div>
+          {trend && (
+            <span
+              className={`flex items-center text-sm font-medium ${
+                trend === "up" ? "text-green-600" : "text-red-600"
+              }`}
+            >
+              {trend === "up" ? (
+                <ArrowUpRight className="w-4 h-4" />
+              ) : (
+                <ArrowDownRight className="w-4 h-4" />
+              )}
+              {trendValue}
+            </span>
+          )}
+        </div>
+        <div className="mt-4">
+          <p className="text-sm font-medium text-gray-500">{title}</p>
+          <p className="text-2xl font-bold mt-1">{value}</p>
+          {description && (
+            <p className="text-sm text-gray-500 mt-1">{description}</p>
+          )}
         </div>
       </CardContent>
     </Card>
   );
 }
 
-function BookingCard({
-  booking,
-  type,
-}: {
-  booking: any;
-  type: "current" | "upcoming";
-}) {
+function BookingCard({ booking, type }: { booking: any; type: string }) {
   return (
-    <Card>
-      <CardContent className="p-6">
-        <div className="flex justify-between items-start">
-          <div>
-            <h3 className="font-semibold">{booking.car}</h3>
-            <p className="text-sm text-gray-500">
-              {type === "current" ? "Return" : "Pickup"}:{" "}
-              {type === "current" ? booking.returnDate : booking.date}
-            </p>
+    <Card className="overflow-hidden hover:shadow-lg transition-shadow">
+      <CardContent className="p-4">
+        <div className="flex items-center gap-4">
+          <div className="flex-shrink-0">
+            <div
+              className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                type === "current" ? "bg-green-50" : "bg-blue-50"
+              }`}
+            >
+              {type === "current" ? (
+                <Clock
+                  className={`w-6 h-6 ${
+                    type === "current" ? "text-green-600" : "text-blue-600"
+                  }`}
+                />
+              ) : (
+                <CalendarCheck
+                  className={`w-6 h-6 ${
+                    type === "current" ? "text-green-600" : "text-blue-600"
+                  }`}
+                />
+              )}
+            </div>
           </div>
-          <div className="flex gap-2">
-            {type === "current" ? (
-              <Button variant="default" size="sm">
-                Extend
-              </Button>
-            ) : (
-              <>
-                <Button variant="outline" size="sm">
-                  Modify
-                </Button>
-                <Button variant="outline" size="sm">
-                  Cancel
-                </Button>
-              </>
-            )}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-medium text-gray-900 truncate">
+                {booking.user}
+              </p>
+              <span
+                className={`px-2 py-1 text-xs font-medium rounded-full ${
+                  type === "current"
+                    ? "bg-green-50 text-green-700"
+                    : "bg-blue-50 text-blue-700"
+                }`}
+              >
+                {type === "current" ? "Active" : "Upcoming"}
+              </span>
+            </div>
+            <p className="text-sm text-gray-500 truncate">{booking.car}</p>
+            <div className="flex items-center justify-between mt-2">
+              <p className="text-xs text-gray-500">
+                {new Date(booking.date).toLocaleDateString()} -{" "}
+                {new Date(booking.returnDate).toLocaleDateString()}
+              </p>
+              <p className="text-sm font-medium text-gray-900">
+                Ksh {booking.amount.toLocaleString()}
+              </p>
+            </div>
           </div>
         </div>
       </CardContent>
@@ -120,151 +173,175 @@ function BookingCard({
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState(mockStats);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // TODO: Replace with actual API call
   useEffect(() => {
-    // Fetch dashboard stats
-    // const fetchStats = async () => {
-    //   const response = await fetch('/api/admin/stats');
-    //   const data = await response.json();
-    //   setStats(data);
-    // };
-    // fetchStats();
+    // Simulate API call
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 1000);
   }, []);
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="flex items-center gap-2 text-red-600">
+          <Loader2 className="w-6 h-6 animate-spin" />
+          <span className="font-medium">Loading dashboard...</span>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="space-y-8">
+      {/* Header Section */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-bold">Welcome back, Admin!</h2>
-          <p className="text-gray-500">
-            Here's what's happening with your fleet
+          <h1 className="text-2xl font-bold text-gray-900">
+            Dashboard Overview
+          </h1>
+          <p className="text-gray-500 mt-1">
+            Monitor your fleet's performance and bookings
           </p>
         </div>
-        <Button>Book a New Car</Button>
+        <div className="flex items-center gap-3">
+          <Button variant="outline" className="gap-2">
+            <AlertCircle className="w-4 h-4" />
+            View Alerts
+          </Button>
+          <Button className="gap-2 bg-red-600 hover:bg-red-700">
+            <Car className="w-4 h-4" />
+            Add New Car
+          </Button>
+        </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      {/* Stats Grid */}
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <StatCard
+          title="Total Bookings"
+          value={stats.totalBookings}
+          icon={CalendarCheck}
+          trend="up"
+          trendValue="12%"
+          description="vs. last month"
+        />
         <StatCard
           title="Active Rentals"
-          value="1"
-          color="bg-red-500"
-          textColor="text-white"
-          icon={
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              className="w-6 h-6 text-white"
-            >
-              <path d="M3.375 4.5C2.339 4.5 1.5 5.34 1.5 6.375V13.5h12V6.375c0-1.036-.84-1.875-1.875-1.875h-8.25zM13.5 15h-12v2.625c0 1.035.84 1.875 1.875 1.875h8.25c1.035 0 1.875-.84 1.875-1.875V15z" />
-            </svg>
-          }
+          value={stats.activeBookings}
+          icon={Car}
+          trend="up"
+          trendValue="8%"
+          description="currently on road"
         />
-
         <StatCard
-          title="Loyalty Points"
-          value="1,200"
-          color="bg-blue-500"
-          textColor="text-white"
-          icon={
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              className="w-6 h-6 text-white"
-            >
-              <path
-                fillRule="evenodd"
-                d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z"
-                clipRule="evenodd"
-              />
-            </svg>
-          }
+          title="Total Users"
+          value={stats.totalUsers}
+          icon={Users}
+          trend="up"
+          trendValue="24%"
+          description="registered users"
         />
-
         <StatCard
-          title="Total Trips"
-          value="3"
-          color="bg-green-500"
-          textColor="text-white"
-          icon={
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              className="w-6 h-6 text-white"
-            >
-              <path
-                fillRule="evenodd"
-                d="M11.54 22.351l.07.04.028.016a.76.76 0 00.723 0l.028-.015.071-.041a16.975 16.975 0 001.144-.742 19.58 19.58 0 002.683-2.282c1.944-1.99 3.963-4.98 3.963-8.827a8.25 8.25 0 00-16.5 0c0 3.846 2.02 6.837 3.963 8.827a19.58 19.58 0 002.682 2.282 16.975 16.975 0 001.145.742zM12 13.5a3 3 0 100-6 3 3 0 000 6z"
-                clipRule="evenodd"
-              />
-            </svg>
-          }
-        />
-
-        <StatCard
-          title="Available Cars"
-          value={`${stats.availableCars}/${stats.totalCars}`}
-          icon={
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              className="w-6 h-6"
-            >
-              <path d="M3.375 4.5C2.339 4.5 1.5 5.34 1.5 6.375V13.5h12V6.375c0-1.036-.84-1.875-1.875-1.875h-8.25zM13.5 15h-12v2.625c0 1.035.84 1.875 1.875 1.875h8.25c1.035 0 1.875-.84 1.875-1.875V15z" />
-            </svg>
-          }
+          title="Revenue"
+          value={`Ksh ${stats.totalRevenue.toLocaleString()}`}
+          icon={DollarSign}
+          trend="up"
+          trendValue="18%"
+          description="this month"
         />
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
+      {/* Fleet Status */}
+      <Card className="overflow-hidden">
+        <CardHeader className="border-b border-gray-100 bg-gray-50/50">
+          <CardTitle className="text-lg font-semibold flex items-center gap-2">
+            <TrendingUp className="w-5 h-5 text-red-600" />
+            Fleet Status
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-6">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <p className="text-sm font-medium text-gray-500">
+                Available Cars
+              </p>
+              <p className="text-2xl font-bold">{stats.availableCars}</p>
+              <p className="text-sm text-gray-500">
+                out of {stats.totalCars} total
+              </p>
+            </div>
+            <div className="w-32 h-32 relative">
+              <div className="absolute inset-0 flex items-center justify-center">
+                <svg className="w-full h-full" viewBox="0 0 36 36">
+                  <path
+                    d="M18 2.0845
+                      a 15.9155 15.9155 0 0 1 0 31.831
+                      a 15.9155 15.9155 0 0 1 0 -31.831"
+                    fill="none"
+                    stroke="#E5E7EB"
+                    strokeWidth="3"
+                  />
+                  <path
+                    d="M18 2.0845
+                      a 15.9155 15.9155 0 0 1 0 31.831
+                      a 15.9155 15.9155 0 0 1 0 -31.831"
+                    fill="none"
+                    stroke="#EF4444"
+                    strokeWidth="3"
+                    strokeDasharray={`${
+                      (stats.availableCars / stats.totalCars) * 100
+                    }, 100`}
+                  />
+                </svg>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="text-lg font-bold">
+                    {Math.round((stats.availableCars / stats.totalCars) * 100)}%
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Bookings Grid */}
+      <div className="grid gap-6 lg:grid-cols-2">
         <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Current Rentals</h3>
-          {stats.recentBookings
-            .filter((booking) => booking.status === "active")
-            .map((booking) => (
-              <BookingCard key={booking.id} booking={booking} type="current" />
-            ))}
+          <h2 className="text-lg font-semibold flex items-center gap-2">
+            <Clock className="w-5 h-5 text-red-600" />
+            Current Rentals
+          </h2>
+          <div className="space-y-4">
+            {stats.recentBookings
+              .filter((booking) => booking.status === "active")
+              .map((booking) => (
+                <BookingCard
+                  key={booking.id}
+                  booking={booking}
+                  type="current"
+                />
+              ))}
+          </div>
         </div>
 
         <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Upcoming Rentals</h3>
-          {stats.recentBookings
-            .filter((booking) => booking.status === "upcoming")
-            .map((booking) => (
-              <BookingCard key={booking.id} booking={booking} type="upcoming" />
-            ))}
-        </div>
-      </div>
-
-      <div>
-        <h3 className="text-lg font-semibold mb-4">Recommended for You</h3>
-        <div className="grid gap-4 md:grid-cols-2">
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center gap-4">
-                <div className="w-20 h-20 bg-gray-100 rounded-lg"></div>
-                <div>
-                  <h4 className="font-semibold">Tesla Model 3</h4>
-                  <p className="text-sm text-gray-500">Sedan</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-6">
-              <div className="flex items-center gap-4">
-                <div className="w-20 h-20 bg-gray-100 rounded-lg"></div>
-                <div>
-                  <h4 className="font-semibold">Toyota Land Cruiser</h4>
-                  <p className="text-sm text-gray-500">SUV</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <h2 className="text-lg font-semibold flex items-center gap-2">
+            <CalendarCheck className="w-5 h-5 text-red-600" />
+            Upcoming Rentals
+          </h2>
+          <div className="space-y-4">
+            {stats.recentBookings
+              .filter((booking) => booking.status === "upcoming")
+              .map((booking) => (
+                <BookingCard
+                  key={booking.id}
+                  booking={booking}
+                  type="upcoming"
+                />
+              ))}
+          </div>
         </div>
       </div>
     </div>
