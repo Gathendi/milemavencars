@@ -19,6 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/components/ui/use-toast";
 
 // Available options for dropdowns
 const CATEGORIES = [
@@ -36,6 +37,7 @@ const TRANSMISSION_TYPES = ["Automatic", "Manual", "CVT"];
 const FUEL_TYPES = ["Petrol", "Diesel", "Hybrid", "Electric"];
 
 export default function AdminCarsPage() {
+  const { toast } = useToast();
   const [isOpen, setIsOpen] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -58,29 +60,53 @@ export default function AdminCarsPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          ...formData,
+          name: formData.name,
+          category: formData.category,
           price: parseFloat(formData.price),
           seats: parseInt(formData.seats),
+          transmission: formData.transmission,
+          fuel_type: formData.fuel_type,
+          image_url: formData.image_url,
+          description: formData.description || null,
         }),
       });
 
-      if (response.ok) {
-        setIsOpen(false);
-        setFormData({
-          name: "",
-          category: "",
-          price: "",
-          image_url: "",
-          seats: "",
-          transmission: "",
-          fuel_type: "",
-          description: "",
-          available: true,
-        });
-        window.location.reload();
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to add car");
       }
+
+      // Reset form and close dialog
+      setFormData({
+        name: "",
+        category: "",
+        price: "",
+        seats: "",
+        transmission: "",
+        fuel_type: "",
+        image_url: "",
+        description: "",
+      });
+      setIsOpen(false);
+
+      // Show success toast
+      toast({
+        title: "Success!",
+        description: "Car has been added successfully.",
+        duration: 3000, // Will disappear after 3 seconds
+      });
+
+      // Optionally refresh the car list
+      // You can implement this part based on your state management approach
     } catch (error) {
       console.error("Error adding car:", error);
+      // Show error toast
+      toast({
+        title: "Error",
+        description: error.message || "Failed to add car. Please try again.",
+        variant: "destructive",
+        duration: 5000,
+      });
     }
   };
 
