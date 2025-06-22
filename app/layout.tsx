@@ -1,20 +1,14 @@
+"use client";
+
 import type React from "react";
-import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { AuthProvider } from "@/lib/auth-context";
+import { Providers } from "./providers";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import "./metadata";
 
 const inter = Inter({ subsets: ["latin"] });
-
-export const metadata: Metadata = {
-  title: "MileMaven - Premium Car Rental in Kenya",
-  description:
-    "Trusted car hire solutions for personal and corporate needs in Kenya. Reliable, affordable, and professional vehicle rentals.",
-  keywords:
-    "car rental Kenya, vehicle hire, corporate car rental, Nairobi car rental",
-};
 
 export default function RootLayout({
   children,
@@ -24,11 +18,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <AuthProvider>
+        <Providers>
           <Header />
           <main>{children}</main>
           <Footer />
-        </AuthProvider>
+        </Providers>
       </body>
     </html>
   );

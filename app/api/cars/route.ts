@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import pool from "@/server/config/database";
+import { db } from "@/lib/db";
 
 // Mock data - In production, this would come from your database
 const cars = [
@@ -103,21 +103,32 @@ export async function GET(request: Request) {
       query += " WHERE " + conditions.join(" AND ");
     }
 
-    const result = await pool.query(query, params);
+    query += " ORDER BY created_at DESC";
+
+    const result = await db.query(query, params);
     
-    // Transform the data to match the expected format
-    const cars = result.rows.map(car => ({
-      id: car.id.toString(),
-      name: car.name,
-      category: car.category,
-      price: parseFloat(car.price),
-      image_url: car.image_url,
-      seats: car.seats,
-      transmission: car.transmission,
-      fuel_type: car.fuel_type,
-      available: car.available,
-      description: car.description
-    }));
+    // Transform the data to match the expected format in the frontend
+    const cars = result.rows.map(car => {
+      // Safely convert price_per_day to a number
+      let price = null;
+      if (car.price_per_day !== null && car.price_per_day !== undefined) {
+        const parsed = parseFloat(car.price_per_day);
+        price = isNaN(parsed) ? null : parsed;
+      }
+
+      return {
+        id: car.id.toString(),
+        name: car.name,
+        category: car.category,
+        price,
+        image_url: car.image_url,
+        seats: car.specifications?.seats || 5,
+        transmission: car.specifications?.transmission || "Automatic",
+        fuel_type: car.specifications?.fuel_type || "Petrol",
+        available: car.available,
+        description: car.description
+      };
+    });
 
     return NextResponse.json(cars);
   } catch (error) {
@@ -128,21 +139,43 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json()
+    const body = await request.json();
 
-    // In production, validate admin authentication here
-
-    const newCar = {
-      id: Date.now().toString(),
-      ...body,
-      available: true,
+    // Safely convert price to a number
+    let price_per_day = null;
+    if (body.price !== null && body.price !== undefined) {
+      const parsed = parseFloat(body.price);
+      price_per_day = isNaN(parsed) ? null : parsed;
     }
 
-    cars.push(newCar)
+    const result = await db.query(
+      `INSERT INTO cars (
+        name,
+        category,
+        price_per_day,
+        image_url,
+        description,
+        specifications,
+        available
+      ) VALUES ($1, $2, $3, $4, $5, $6, true)
+      RETURNING *`,
+      [
+        body.name,
+        body.category,
+        price_per_day,
+        body.image_url,
+        body.description,
+        {
+          seats: body.seats,
+          transmission: body.transmission,
+          fuel_type: body.fuel_type
+        }
+      ]
+    );
 
-    return NextResponse.json(newCar, { status: 201 })
+    return NextResponse.json(result.rows[0], { status: 201 });
   } catch (error) {
-    console.error("Error creating car:", error)
-    return NextResponse.json({ error: "Failed to create car" }, { status: 500 })
+    console.error("Error creating car:", error);
+    return NextResponse.json({ error: "Failed to create car" }, { status: 500 });
   }
 }

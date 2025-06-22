@@ -6,7 +6,7 @@ interface CarDetailsProps {
     id: string;
     name: string;
     category: string;
-    price: number;
+    price: number | null;
     image_url: string;
     seats: number;
     transmission: string;
@@ -25,6 +25,13 @@ export default function CarDetails({
   imageHeight = "h-64",
   noCardStyle = false,
 }: CarDetailsProps) {
+  const formatPrice = (price: number | null): string => {
+    if (price === null || typeof price !== "number") {
+      return "0";
+    }
+    return price.toLocaleString();
+  };
+
   const content = (
     <>
       <div className={`relative w-full ${imageHeight}`}>
@@ -74,7 +81,7 @@ export default function CarDetails({
         {showPrice && (
           <div className="mb-2">
             <span className="text-2xl font-bold text-red-600">
-              KSh {car.price.toLocaleString()}
+              KSh {formatPrice(car.price)}
             </span>
             <span className="text-gray-500">/day</span>
           </div>
