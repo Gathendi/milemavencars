@@ -1,72 +1,139 @@
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 import { useState } from "react";
-import { useAuth } from "@/lib/auth-context";
-import CarDetails from "./CarDetails";
 import { X } from "lucide-react";
+import CarDetails from "./CarDetails";
 
-interface CarCardProps {
-  car: {
-    id: string;
-    name: string;
-    category: string;
-    price: number;
-    image_url: string;
-    seats: number;
-    transmission: string;
-    fuel_type: string;
-    available: boolean;
-    description?: string;
-  };
+interface Car {
+  id: string | number;
+  name: string;
+  category: string;
+  price: number;
+  image_url: string;
+  seats: number;
+  transmission: string;
+  fuel_type: string;
+  available: boolean;
+  description?: string;
+  total_bookings?: number;
+  active_bookings?: number;
 }
 
-export default function CarCard({ car }: CarCardProps) {
-  const [showModal, setShowModal] = useState(false);
-  const { user } = useAuth();
+interface CarCardProps {
+  car: Car;
+  isAdmin?: boolean;
+  onEdit?: (car: Car) => void;
+  onDelete?: (car: Car) => void;
+}
 
-  const handleBookNow = () => {
-    if (!user) {
-      // Redirect to login page with return URL
-      window.location.href = `/login?returnUrl=/book/${car.id}`;
-      return;
-    }
-    // If user is logged in, proceed to booking
-    window.location.href = `/book/${car.id}`;
-  };
+export default function CarCard({
+  car,
+  isAdmin,
+  onEdit,
+  onDelete,
+}: CarCardProps) {
+  const [showModal, setShowModal] = useState(false);
 
   return (
     <>
-      <div className="bg-white rounded-xl shadow-lg overflow-hidden transition-shadow duration-300">
-        <CarDetails
-          car={car}
-          imageHeight="h-48"
-          showPrice={true}
-          noCardStyle={true}
-        />
-        <div className="p-6 pt-0">
-          <div className="flex gap-4 mt-6">
-            <button
-              onClick={() => setShowModal(true)}
-              className="flex-1 border border-red-600 text-red-600 hover:bg-red-50 font-semibold rounded-lg px-6 py-3 transition-colors"
-              type="button"
-            >
-              Show More Details
-            </button>
-            <button
-              onClick={handleBookNow}
-              disabled={!car.available}
-              className={`flex-1 px-6 py-3 rounded-lg font-semibold transition-colors ${
-                car.available
-                  ? "bg-red-600 hover:bg-red-700 text-white"
-                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
-              }`}
-              type="button"
-            >
-              {car.available ? "Book Now" : "Unavailable"}
-            </button>
+      <div className="bg-white rounded-xl shadow-lg overflow-hidden transition-shadow duration-300 hover:shadow-xl">
+        <div className="relative">
+          <img
+            src={car.image_url}
+            alt={car.name}
+            className="w-full h-48 object-cover"
+          />
+          {!car.available && (
+            <div className="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded-full text-sm font-medium">
+              Not Available
+            </div>
+          )}
+          {isAdmin && (
+            <div className="absolute bottom-2 right-2 flex space-x-2">
+              <div className="bg-white/90 backdrop-blur-sm text-sm px-2 py-1 rounded-full">
+                Total Bookings: {car.total_bookings || 0}
+              </div>
+              <div className="bg-white/90 backdrop-blur-sm text-sm px-2 py-1 rounded-full">
+                Active: {car.active_bookings || 0}
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="p-6">
+          <h3 className="text-xl font-semibold mb-2">{car.name}</h3>
+          <div className="space-y-3">
+            <div className="flex justify-between items-center text-sm">
+              <span className="text-gray-600">Category</span>
+              <span className="font-medium">{car.category}</span>
+            </div>
+            <div className="flex justify-between items-center text-sm">
+              <span className="text-gray-600">Price per day</span>
+              <span className="font-medium text-red-600">
+                KSh {car.price.toLocaleString()}
+              </span>
+            </div>
+            <div className="flex justify-between items-center text-sm">
+              <span className="text-gray-600">Seats</span>
+              <span className="font-medium">{car.seats}</span>
+            </div>
+            <div className="flex justify-between items-center text-sm">
+              <span className="text-gray-600">Transmission</span>
+              <span className="font-medium">{car.transmission}</span>
+            </div>
+            <div className="flex justify-between items-center text-sm">
+              <span className="text-gray-600">Fuel Type</span>
+              <span className="font-medium">{car.fuel_type}</span>
+            </div>
+          </div>
+
+          <div className="mt-6 space-y-3">
+            {isAdmin ? (
+              <div className="flex justify-end space-x-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onEdit && onEdit(car)}
+                >
+                  Edit
+                </Button>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => onDelete && onDelete(car)}
+                >
+                  Delete
+                </Button>
+              </div>
+            ) : (
+              <>
+                <button
+                  onClick={() => setShowModal(true)}
+                  className="w-full border border-red-600 text-red-600 hover:bg-red-50 font-semibold rounded-lg px-6 py-3 transition-colors"
+                  type="button"
+                >
+                  Show More Details
+                </button>
+                <Link href={`/book/${car.id}`} className="block w-full">
+                  <button
+                    disabled={!car.available}
+                    className={`w-full px-6 py-3 rounded-lg font-semibold transition-colors ${
+                      car.available
+                        ? "bg-red-600 hover:bg-red-700 text-white"
+                        : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                    }`}
+                    type="button"
+                  >
+                    {car.available ? "Book Now" : "Not Available"}
+                  </button>
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </div>
 
-      {/* Modal */}
+      {/* Details Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-lg">
@@ -131,17 +198,18 @@ export default function CarCard({ car }: CarCardProps) {
                 </div>
               </div>
               <div className="mt-6">
-                <button
-                  onClick={handleBookNow}
-                  disabled={!car.available}
-                  className={`w-full px-6 py-3 rounded-lg font-semibold transition-colors ${
-                    car.available
-                      ? "bg-red-600 hover:bg-red-700 text-white"
-                      : "bg-gray-300 text-gray-500 cursor-not-allowed"
-                  }`}
-                >
-                  {car.available ? "Book Now" : "Unavailable"}
-                </button>
+                <Link href={`/book/${car.id}`} className="block w-full">
+                  <button
+                    disabled={!car.available}
+                    className={`w-full px-6 py-3 rounded-lg font-semibold transition-colors ${
+                      car.available
+                        ? "bg-red-600 hover:bg-red-700 text-white"
+                        : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                    }`}
+                  >
+                    {car.available ? "Book Now" : "Not Available"}
+                  </button>
+                </Link>
               </div>
             </div>
           </div>

@@ -22,8 +22,10 @@ CREATE TABLE cars (
     fuel_type VARCHAR(20) NOT NULL,
     description TEXT,
     available BOOLEAN DEFAULT true,
+    featured BOOLEAN DEFAULT false,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP
 );
 -- Bookings table
 CREATE TABLE bookings (
@@ -71,6 +73,8 @@ CREATE TABLE IF NOT EXISTS password_resets (
 CREATE INDEX idx_users_email ON users(email);
 CREATE INDEX idx_cars_category ON cars(category);
 CREATE INDEX idx_cars_available ON cars(available);
+CREATE INDEX idx_cars_featured ON cars(featured);
+CREATE INDEX idx_cars_deleted_at ON cars(deleted_at);
 CREATE INDEX idx_bookings_user_id ON bookings(user_id);
 CREATE INDEX idx_bookings_car_id ON bookings(car_id);
 CREATE INDEX idx_bookings_dates ON bookings(start_date, end_date);

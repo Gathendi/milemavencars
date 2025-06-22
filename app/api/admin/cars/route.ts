@@ -1,20 +1,54 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    const { searchParams } = new URL(request.url);
+    const page = parseInt(searchParams.get("page") || "1");
+    const limit = parseInt(searchParams.get("limit") || "9");
+    const offset = (page - 1) * limit;
+
+    // Get total count
+    const totalCountResult = await db.query(
+      "SELECT COUNT(*) FROM cars WHERE deleted_at IS NULL"
+    );
+    const total = parseInt(totalCountResult.rows[0].count);
+
+    // Get paginated cars with booking statistics
     const result = await db.query(
       `SELECT 
-        c.*,
-        COUNT(b.id) as total_bookings,
-        SUM(CASE WHEN b.status = 'active' THEN 1 ELSE 0 END) as active_bookings
-       FROM cars c
-       LEFT JOIN bookings b ON c.id = b.car_id
-       GROUP BY c.id
-       ORDER BY c.created_at DESC`
+        c.id, 
+        c.name, 
+        c.category, 
+        c.price, 
+        c.image_url, 
+        c.seats, 
+        c.transmission, 
+        c.fuel_type, 
+        c.description,
+        c.available,
+        c.created_at,
+        c.updated_at,
+        COUNT(DISTINCT b.id) as total_bookings,
+        COUNT(DISTINCT CASE WHEN b.status = 'active' THEN b.id END) as active_bookings
+      FROM cars c
+      LEFT JOIN bookings b ON c.id = b.car_id
+      WHERE c.deleted_at IS NULL 
+      GROUP BY c.id
+      ORDER BY c.created_at DESC 
+      LIMIT $1 OFFSET $2`,
+      [limit, offset]
     );
 
-    return NextResponse.json(result.rows);
+    return NextResponse.json({
+      cars: result.rows,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit)
+      }
+    });
   } catch (error) {
     console.error("Error fetching cars:", error);
     return NextResponse.json(
@@ -49,7 +83,7 @@ export async function POST(request: NextRequest) {
         image_url,
         description,
         available
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, true)
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
       RETURNING *`,
       [
         name,
@@ -59,7 +93,8 @@ export async function POST(request: NextRequest) {
         transmission,
         fuel_type,
         image_url,
-        description
+        description,
+        true // New cars are available by default
       ]
     );
 
@@ -143,34 +178,20 @@ export async function DELETE(request: NextRequest) {
       );
     }
 
-    // Check if car has active bookings
-    const activeBookings = await db.query(
-      `SELECT COUNT(*) as count
-       FROM bookings
-       WHERE car_id = $1 AND status = 'active'`,
-      [id]
-    );
-
-    if (activeBookings.rows[0].count > 0) {
-      return NextResponse.json(
-        { error: "Cannot delete car with active bookings" },
-        { status: 400 }
-      );
-    }
-
+    // Soft delete by setting deleted_at
     const result = await db.query(
-      `DELETE FROM cars WHERE id = $1 RETURNING *`,
+      "UPDATE cars SET deleted_at = NOW() WHERE id = $1 RETURNING *",
       [id]
     );
 
-    if (result.rows.length === 0) {
+    if (result.rowCount === 0) {
       return NextResponse.json(
         { error: "Car not found" },
         { status: 404 }
       );
     }
 
-    return NextResponse.json({ message: "Car deleted successfully" });
+    return NextResponse.json(result.rows[0]);
   } catch (error) {
     console.error("Error deleting car:", error);
     return NextResponse.json(

@@ -3,10 +3,10 @@ import Image from "next/image";
 
 interface CarDetailsProps {
   car: {
-    id: string;
+    id: string | number;
     name: string;
     category: string;
-    price: number | null;
+    price: number;
     image_url: string;
     seats: number;
     transmission: string;
@@ -14,15 +14,15 @@ interface CarDetailsProps {
     available: boolean;
     description?: string;
   };
-  showPrice?: boolean;
   imageHeight?: string;
+  showPrice?: boolean;
   noCardStyle?: boolean;
 }
 
 export default function CarDetails({
   car,
-  showPrice = true,
-  imageHeight = "h-64",
+  imageHeight = "h-48",
+  showPrice = false,
   noCardStyle = false,
 }: CarDetailsProps) {
   const formatPrice = (price: number | null): string => {
@@ -34,58 +34,46 @@ export default function CarDetails({
 
   const content = (
     <>
-      <div className={`relative w-full ${imageHeight}`}>
-        <Image
-          src={
-            car.image_url ||
-            `https://source.unsplash.com/800x600/?car&sig=${car.id}`
-          }
+      <div className="relative">
+        <img
+          src={car.image_url}
           alt={car.name}
-          fill
-          className="object-cover rounded-t-xl"
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-          priority={false}
+          className={`w-full ${imageHeight} object-cover rounded-t-lg`}
         />
-        <div className="absolute top-4 left-4">
-          <span className="bg-red-600 text-white px-3 py-1 rounded-full text-sm font-semibold">
-            {car.category}
-          </span>
-        </div>
         {!car.available && (
-          <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-t-xl">
-            <span className="bg-red-600 text-white px-4 py-2 rounded-lg font-semibold">
-              Not Available
-            </span>
+          <div className="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded-full text-sm font-medium">
+            Not Available
           </div>
         )}
       </div>
-      <div className="p-6 pb-2">
-        <h3 className="text-xl font-bold mb-1">{car.name}</h3>
-        {car.description && (
-          <p className="text-gray-600 mb-2">{car.description}</p>
-        )}
-        <div className="grid grid-cols-3 gap-4 mb-4 text-sm text-gray-600">
-          <div className="flex items-center space-x-2">
-            <Users className="w-4 h-4" />
-            <span>{car.seats} seats</span>
+      <div className="p-4">
+        <h3 className="text-xl font-semibold mb-4">{car.name}</h3>
+        <div className="space-y-3">
+          <div className="flex justify-between items-center text-sm">
+            <span className="text-gray-600">Category</span>
+            <span className="font-medium">{car.category}</span>
           </div>
-          <div className="flex items-center space-x-2">
-            <Settings className="w-4 h-4" />
-            <span>{car.transmission}</span>
+          {showPrice && (
+            <div className="flex justify-between items-center text-sm">
+              <span className="text-gray-600">Price per day</span>
+              <span className="font-medium text-red-600">
+                KSh {formatPrice(car.price)}
+              </span>
+            </div>
+          )}
+          <div className="flex justify-between items-center text-sm">
+            <span className="text-gray-600">Seats</span>
+            <span className="font-medium">{car.seats}</span>
           </div>
-          <div className="flex items-center space-x-2">
-            <Fuel className="w-4 h-4" />
-            <span>{car.fuel_type}</span>
+          <div className="flex justify-between items-center text-sm">
+            <span className="text-gray-600">Transmission</span>
+            <span className="font-medium">{car.transmission}</span>
+          </div>
+          <div className="flex justify-between items-center text-sm">
+            <span className="text-gray-600">Fuel Type</span>
+            <span className="font-medium">{car.fuel_type}</span>
           </div>
         </div>
-        {showPrice && (
-          <div className="mb-2">
-            <span className="text-2xl font-bold text-red-600">
-              KSh {formatPrice(car.price)}
-            </span>
-            <span className="text-gray-500">/day</span>
-          </div>
-        )}
       </div>
     </>
   );
@@ -93,8 +81,9 @@ export default function CarDetails({
   if (noCardStyle) {
     return content;
   }
+
   return (
-    <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+    <div className="bg-white rounded-lg shadow-md overflow-hidden">
       {content}
     </div>
   );

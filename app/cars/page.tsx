@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import CarCard from "@/components/CarCard";
 import { Search, Filter } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface Car {
   id: string;
@@ -14,6 +15,15 @@ interface Car {
   transmission: string;
   fuel_type: string;
   available: boolean;
+  featured: boolean;
+  description?: string;
+}
+
+interface PaginationData {
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
 }
 
 export default function CarsPage() {
@@ -23,20 +33,34 @@ export default function CarsPage() {
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [priceRange, setPriceRange] = useState("all");
   const [loading, setLoading] = useState(true);
+  const [pagination, setPagination] = useState<PaginationData>({
+    total: 0,
+    page: 1,
+    limit: 9,
+    totalPages: 1,
+  });
 
   useEffect(() => {
-    fetchCars();
+    fetchCars(1);
   }, []);
 
   useEffect(() => {
     filterCars();
   }, [cars, searchTerm, selectedCategory, priceRange]);
 
-  const fetchCars = async () => {
+  const fetchCars = async (page: number = 1) => {
     try {
-      const response = await fetch("/api/cars");
+      setLoading(true);
+      const response = await fetch(
+        `/api/cars?page=${page}&limit=${pagination.limit}`
+      );
+      if (!response.ok) {
+        throw new Error("Failed to fetch cars");
+      }
       const data = await response.json();
-      setCars(data);
+      setCars(data.cars);
+      setFilteredCars(data.cars);
+      setPagination(data.pagination);
     } catch (error) {
       console.error("Error fetching cars:", error);
     } finally {
@@ -161,7 +185,7 @@ export default function CarsPage() {
       {/* Results Count */}
       <div className="mb-6">
         <p className="text-gray-600">
-          Showing {filteredCars.length} of {cars.length} vehicles
+          Showing {filteredCars.length} of {pagination.total} vehicles
         </p>
       </div>
 
@@ -181,6 +205,40 @@ export default function CarsPage() {
           <p className="text-gray-500">Try adjusting your search criteria</p>
         </div>
       )}
+
+      {/* Pagination */}
+      {pagination.totalPages > 1 &&
+        !searchTerm &&
+        selectedCategory === "all" &&
+        priceRange === "all" && (
+          <div className="mt-8 flex justify-center space-x-2">
+            <Button
+              variant="outline"
+              onClick={() => fetchCars(pagination.page - 1)}
+              disabled={pagination.page === 1}
+            >
+              Previous
+            </Button>
+            {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map(
+              (pageNum) => (
+                <Button
+                  key={pageNum}
+                  variant={pageNum === pagination.page ? "default" : "outline"}
+                  onClick={() => fetchCars(pageNum)}
+                >
+                  {pageNum}
+                </Button>
+              )
+            )}
+            <Button
+              variant="outline"
+              onClick={() => fetchCars(pagination.page + 1)}
+              disabled={pagination.page === pagination.totalPages}
+            >
+              Next
+            </Button>
+          </div>
+        )}
     </div>
   );
 }
