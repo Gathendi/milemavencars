@@ -21,7 +21,7 @@ const ADMIN_NAV_ITEMS = [
     ),
   },
   {
-    title: "Cars",
+    title: "Manage Fleet",
     href: "/admin/cars",
     icon: (
       <svg
