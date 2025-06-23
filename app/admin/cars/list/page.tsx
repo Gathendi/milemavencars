@@ -13,15 +13,17 @@ function formatPrice(price: number) {
   }).format(price);
 }
 
-async function getCars() {
+async function getCars(page: number = 1, limit: number = 10) {
   try {
+    const offset = (page - 1) * limit;
+
     // Get total count
     const totalCountResult = await db.query(
       "SELECT COUNT(*) FROM cars WHERE deleted_at IS NULL"
     );
     const total = parseInt(totalCountResult.rows[0].count);
 
-    // Get cars
+    // Get cars with pagination
     const result = await db.query(
       `SELECT 
         id, 
@@ -40,19 +42,61 @@ async function getCars() {
       FROM cars 
       WHERE deleted_at IS NULL 
       ORDER BY featured DESC, created_at DESC 
-      LIMIT $1`,
-      [100]
+      LIMIT $1 OFFSET $2`,
+      [limit, offset]
     );
 
-    return { cars: result.rows, total };
+    return {
+      cars: result.rows,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
   } catch (error) {
     console.error("Error fetching cars:", error);
     throw new Error("Failed to fetch cars");
   }
 }
 
-export default async function VehicleListPage() {
-  const { cars, total } = await getCars();
+export default async function VehicleListPage({
+  searchParams,
+}: {
+  searchParams: { page?: string };
+}) {
+  const currentPage = Number(searchParams.page) || 1;
+  const { cars, pagination } = await getCars(currentPage);
+
+  // Generate pagination range
+  const paginationRange = () => {
+    const range = [];
+    const showPages = 5; // Number of page buttons to show
+    const leftOffset = Math.floor(showPages / 2);
+
+    let start = currentPage - leftOffset;
+    let end = currentPage + leftOffset;
+
+    if (start < 1) {
+      end += Math.abs(start) + 1;
+      start = 1;
+    }
+
+    if (end > pagination.totalPages) {
+      start -= end - pagination.totalPages;
+      end = pagination.totalPages;
+    }
+
+    start = Math.max(start, 1);
+    end = Math.min(end, pagination.totalPages);
+
+    for (let i = start; i <= end; i++) {
+      range.push(i);
+    }
+
+    return range;
+  };
 
   return (
     <div className="container mx-auto py-6 space-y-6">
@@ -61,7 +105,7 @@ export default async function VehicleListPage() {
         <div>
           <h1 className="text-2xl font-bold text-gray-800">Vehicle List</h1>
           <p className="text-gray-600 mt-1">
-            Manage your fleet of {total} vehicles
+            Manage your fleet of {pagination.total} vehicles
           </p>
         </div>
         <div className="flex gap-4">
@@ -98,7 +142,7 @@ export default async function VehicleListPage() {
           <div className="text-sm font-medium text-gray-500">
             Total Vehicles
           </div>
-          <div className="text-2xl font-semibold mt-1">{total}</div>
+          <div className="text-2xl font-semibold mt-1">{pagination.total}</div>
         </div>
         <div className="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
           <div className="text-sm font-medium text-gray-500">Available</div>
@@ -142,7 +186,9 @@ export default async function VehicleListPage() {
                   key={car.id}
                   className="hover:bg-gray-50/50 transition-colors"
                 >
-                  <td className="px-6 py-4 text-gray-500">{index + 1}</td>
+                  <td className="px-6 py-4 text-gray-500">
+                    {(currentPage - 1) * pagination.limit + index + 1}
+                  </td>
                   <td className="px-6 py-4">
                     <div className="w-20 h-14 relative rounded-lg overflow-hidden bg-gray-50">
                       <Image
@@ -260,6 +306,58 @@ export default async function VehicleListPage() {
             </tbody>
           </table>
         </div>
+
+        {/* Pagination */}
+        {pagination.totalPages > 1 && (
+          <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100">
+            <div className="text-sm text-gray-500">
+              Showing {(currentPage - 1) * pagination.limit + 1} to{" "}
+              {Math.min(currentPage * pagination.limit, pagination.total)} of{" "}
+              {pagination.total} vehicles
+            </div>
+            <div className="flex gap-2">
+              <Link
+                href={`/admin/cars/list?page=${Math.max(1, currentPage - 1)}`}
+                className={`inline-flex items-center justify-center px-3 py-1 border rounded-md text-sm font-medium transition-colors
+                  ${
+                    currentPage === 1
+                      ? "border-gray-200 text-gray-300 cursor-not-allowed"
+                      : "border-gray-300 text-gray-700 hover:bg-gray-50"
+                  }`}
+              >
+                Previous
+              </Link>
+              {paginationRange().map((pageNum) => (
+                <Link
+                  key={pageNum}
+                  href={`/admin/cars/list?page=${pageNum}`}
+                  className={`inline-flex items-center justify-center w-8 h-8 border rounded-md text-sm font-medium transition-colors
+                    ${
+                      pageNum === currentPage
+                        ? "border-blue-600 bg-blue-50 text-blue-600"
+                        : "border-gray-300 text-gray-700 hover:bg-gray-50"
+                    }`}
+                >
+                  {pageNum}
+                </Link>
+              ))}
+              <Link
+                href={`/admin/cars/list?page=${Math.min(
+                  pagination.totalPages,
+                  currentPage + 1
+                )}`}
+                className={`inline-flex items-center justify-center px-3 py-1 border rounded-md text-sm font-medium transition-colors
+                  ${
+                    currentPage === pagination.totalPages
+                      ? "border-gray-200 text-gray-300 cursor-not-allowed"
+                      : "border-gray-300 text-gray-700 hover:bg-gray-50"
+                  }`}
+              >
+                Next
+              </Link>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
