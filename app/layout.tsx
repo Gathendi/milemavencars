@@ -11,6 +11,7 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "MileMaven Car Rental",
   description: "Your trusted partner for car rentals in Kenya",
+  
 };
 
 export default function RootLayout({
