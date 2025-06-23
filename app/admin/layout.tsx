@@ -33,6 +33,16 @@ const ADMIN_NAV_ITEMS = [
         <path d="M3.375 4.5C2.339 4.5 1.5 5.34 1.5 6.375V13.5h12V6.375c0-1.036-.84-1.875-1.875-1.875h-8.25zM13.5 15h-12v2.625c0 1.035.84 1.875 1.875 1.875h8.25c1.035 0 1.875-.84 1.875-1.875V15z" />
       </svg>
     ),
+    subItems: [
+      {
+        title: "Vehicle List",
+        href: "/admin/cars/list",
+      },
+      {
+        title: "Add Vehicle",
+        href: "/admin/cars/add",
+      },
+    ],
   },
   {
     title: "Bookings",
@@ -150,19 +160,33 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         </div>
         <nav className="mt-2">
           {ADMIN_NAV_ITEMS.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="flex items-center gap-3 px-6 py-3 text-gray-700 hover:bg-gray-50 transition-colors"
-            >
-              <span className="text-gray-500">{item.icon}</span>
-              <span className="text-sm font-medium">{item.title}</span>
-              {item.badge && (
-                <span className="ml-auto text-[10px] font-semibold bg-red-100 text-red-600 px-1.5 py-0.5 rounded-full">
-                  {item.badge}
-                </span>
+            <div key={item.href}>
+              <Link
+                href={item.href}
+                className="flex items-center gap-3 px-6 py-3 text-gray-700 hover:bg-gray-50 transition-colors"
+              >
+                <span className="text-gray-500">{item.icon}</span>
+                <span className="text-sm font-medium">{item.title}</span>
+                {item.badge && (
+                  <span className="ml-auto text-[10px] font-semibold bg-red-100 text-red-600 px-1.5 py-0.5 rounded-full">
+                    {item.badge}
+                  </span>
+                )}
+              </Link>
+              {item.subItems && (
+                <div className="ml-12 space-y-1">
+                  {item.subItems.map((subItem) => (
+                    <Link
+                      key={subItem.href}
+                      href={subItem.href}
+                      className="block py-2 text-sm text-gray-600 hover:text-gray-900"
+                    >
+                      {subItem.title}
+                    </Link>
+                  ))}
+                </div>
               )}
-            </Link>
+            </div>
           ))}
         </nav>
       </aside>
