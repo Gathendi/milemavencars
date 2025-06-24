@@ -47,9 +47,9 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="py-12">
+    <div>
       {/* Header */}
-      <div className="bg-black text-white py-16">
+      <div className="bg-black text-white py-12">
         <div className="container mx-auto px-4 text-center">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">
             Get in <span className="text-red-600">Touch</span>
@@ -61,7 +61,7 @@ export default function ContactPage() {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-12">
+      <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Contact Information */}
           <div className="space-y-8">
