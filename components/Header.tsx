@@ -4,7 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
-import { Menu, X, User, LogOut, Car } from "lucide-react";
+import { Menu, X, Car } from "lucide-react";
+import ProfileMenu from "./ProfileMenu";
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -40,29 +41,12 @@ export default function Header() {
             >
               Contact
             </Link>
-            {user?.role === "admin" && (
-              <Link
-                href="/admin"
-                className="hover:text-red-600 transition-colors"
-              >
-                Admin
-              </Link>
-            )}
           </nav>
 
           {/* Auth Section */}
           <div className="hidden md:flex items-center space-x-4">
             {user ? (
-              <div className="flex items-center space-x-4">
-                <span className="flex items-center space-x-2">
-                  <User size={20} />
-                  <span>Welcome back, {user.name.split(" ")[0]}</span>
-                </span>
-                <Button onClick={logout} variant="ghost" size="sm">
-                  <LogOut size={16} className="mr-2" />
-                  Logout
-                </Button>
-              </div>
+              <ProfileMenu />
             ) : (
               <div className="space-x-4">
                 <Link href="/login">
@@ -109,25 +93,35 @@ export default function Header() {
               >
                 Contact
               </Link>
-              {user?.role === "admin" && (
-                <Link
-                  href="/admin"
-                  className="hover:text-red-600 transition-colors"
-                >
-                  Admin
-                </Link>
-              )}
               {user ? (
-                <Button
-                  onClick={logout}
-                  variant="ghost"
-                  className="justify-start"
-                >
-                  <LogOut size={16} className="mr-2" />
-                  Logout
-                </Button>
+                <div className="pt-2 border-t border-gray-700">
+                  <Link
+                    href="/profile"
+                    className="block py-2 hover:text-red-600"
+                  >
+                    Profile Settings
+                  </Link>
+                  {user.role === "admin" && (
+                    <Link
+                      href="/admin"
+                      className="block py-2 hover:text-red-600"
+                    >
+                      Admin Dashboard
+                    </Link>
+                  )}
+                  <Button
+                    onClick={() => {
+                      setIsMenuOpen(false);
+                      logout();
+                    }}
+                    variant="ghost"
+                    className="w-full justify-start mt-2 text-red-600 hover:text-red-700"
+                  >
+                    Log out
+                  </Button>
+                </div>
               ) : (
-                <div className="space-y-2">
+                <div className="space-y-2 pt-2 border-t border-gray-700">
                   <Link href="/login">
                     <Button variant="ghost" className="w-full justify-start">
                       Login
